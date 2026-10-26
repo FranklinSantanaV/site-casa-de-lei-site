@@ -163,5 +163,48 @@ document.querySelectorAll(".titulo-recolhivel").forEach(function (botao) {
         sinal.textContent = aberto ? "＋" : "−";
     });
 });
+// ===== CONTROLE DE MATERIAIS DA CASA =====
 
+async function verificarAcessoMateriais() {
+    const { data: { user }, error } =
+        await supabaseClient.auth.getUser();
+
+    if (error || !user) {
+        console.log("Usuário não está conectado.");
+        return;
+    }
+
+    const { data: perfil, error: erroPerfil } =
+        await supabaseClient
+            .from("perfis_casa")
+            .select("nome_usuario, aprovado, administrador")
+            .eq("id", user.id)
+            .maybeSingle();
+
+    if (erroPerfil) {
+        console.error("Erro ao consultar perfil:", erroPerfil.message);
+        return;
+    }
+
+    if (!perfil || !perfil.aprovado) {
+        console.log("Acesso pendente de aprovação.");
+        return;
+    }
+
+    console.log("Acesso autorizado:", perfil.nome_usuario);
+}
+
+async function listarMateriaisCasa() {
+    const { data, error } = await supabaseClient
+        .from("materiais_casa")
+        .select("id, item, quantidade, observacao, categoria, status")
+        .order("id", { ascending: true });
+
+    if (error) {
+        console.error("Erro ao listar materiais:", error.message);
+        return [];
+    }
+
+    return data;
+}
 
