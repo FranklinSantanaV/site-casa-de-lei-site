@@ -231,6 +231,7 @@ function mostrarPainelAdministrativo(mostrar) {
 
 /* EXIBIR A LISTA DE MATERIAIS */
 
+
 async function atualizarListaMateriais() {
     if (!listaMateriais || !mensagemMateriais) {
         return;
@@ -290,45 +291,44 @@ async function atualizarListaMateriais() {
             status,
             observacao
         );
-        
-const botaoEditar = document.createElement("button");
-botaoEditar.type = "button";
-botaoEditar.textContent = "Editar";
 
-botaoEditar.addEventListener("click", function () {
-    materialEmEdicao = material.id;
-    document.getElementById("material-item").value =
-        material.item || "";
+        const botaoEditar = document.createElement("button");
+        botaoEditar.type = "button";
+        botaoEditar.textContent = "Editar";
 
-    document.getElementById("material-quantidade").value =
-        material.quantidade || "";
+        botaoEditar.addEventListener("click", function () {
+            materialEmEdicao = material.id;
 
-    document.getElementById("material-categoria").value =
-        material.categoria || "";
+            document.getElementById("material-item").value =
+                material.item || "";
 
-    document.getElementById("material-status").value =
-        material.status || "Pendente";
+            document.getElementById("material-quantidade").value =
+                material.quantidade || "";
 
-    document.getElementById("material-observacao").value =
-        material.observacao || "";
+            document.getElementById("material-categoria").value =
+                material.categoria || "";
 
-    mensagemMateriais.textContent =
-        "Edite os campos do material e salve as alterações.";
-});
+            document.getElementById("material-status").value =
+                material.status || "Pendente";
 
-itemLista.appendChild(botaoEditar);
+            document.getElementById("material-observacao").value =
+                material.observacao || "";
 
+            botaoCadastrarMaterial.textContent = "Salvar alterações";
+
+            mensagemMateriais.textContent =
+                "Edite os campos acima e clique em Salvar alterações.";
+        });
+
+        itemLista.appendChild(botaoEditar);
 
         itemLista.style.borderBottom = "1px solid #ccc";
         itemLista.style.padding = "12px 0";
 
         listaMateriais.appendChild(itemLista);
-        itemLista.style.borderBottom = "1px solid #ccc";
-itemLista.style.padding = "12px 0";
-
-listaMateriais.appendChild(itemLista);
     });
 }
+
 
 /* LOGIN DA ÁREA DE MEMBROS */
 
