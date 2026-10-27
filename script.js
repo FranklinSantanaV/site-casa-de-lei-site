@@ -241,11 +241,10 @@ async function atualizarListaMateriais() {
     const acesso = await verificarAcessoMateriais();
 
     if (!acesso) {
-    mensagemMateriais.textContent =
-        "Você precisa entrar com uma conta de membro aprovada.";
-    mostrarPainelAdministrativo(false);
-    return;
-}
+        mensagemMateriais.textContent =
+            "Você precisa entrar com uma conta de membro aprovada.";
+        mostrarPainelAdministrativo(false);
+        return;
     }
 
     const materiais = await listarMateriaisCasa();
@@ -319,65 +318,47 @@ async function atualizarListaMateriais() {
                 "Edite os campos acima e clique em Salvar alterações.";
         });
 
-        const botaoExcluir = document.createElement("button");
-        botaoExcluir.type = "button";
-        botaoExcluir.textContent = "Excluir";
+        itemLista.appendChild(botaoEditar);
 
-        botaoExcluir.addEventListener("click", async function () {
-            const confirmar = window.confirm(
-                "Tem certeza de que deseja excluir este material?"
-            );
+        if (acesso.perfil.administrador) {
+            const botaoExcluir = document.createElement("button");
+            botaoExcluir.type = "button";
+            botaoExcluir.textContent = "Excluir";
 
-            if (!confirmar) return;
+            botaoExcluir.addEventListener("click", async function () {
+                const confirmar = window.confirm(
+                    "Tem certeza de que deseja excluir este material?"
+                );
 
-            const acessoAtual = await verificarAcessoMateriais();
+                if (!confirmar) return;
 
-            if (!acessoAtual || !acessoAtual.perfil.administrador) {
+                const acessoAtual = await verificarAcessoMateriais();
+
+                if (!acessoAtual || !acessoAtual.perfil.administrador) {
+                    mensagemMateriais.textContent =
+                        "Você não tem autorização para excluir materiais.";
+                    return;
+                }
+
+                const resultado = await supabaseClient
+                    .from("materiais_casa")
+                    .delete()
+                    .eq("id", material.id)
+                    .select("id");
+
+                if (resultado.error || !resultado.data?.length) {
+                    mensagemMateriais.textContent =
+                        "Não foi possível excluir o material. Verifique as permissões.";
+                    return;
+                }
+
                 mensagemMateriais.textContent =
-                    "Você não tem autorização para excluir materiais.";
-                return;
-            }
+                    "Material excluído com sucesso!";
+                await atualizarListaMateriais();
+            });
 
-            try {
-    const resultado = await supabaseClient
-        .from("materiais_casa")
-        .delete()
-        .eq("id", material.id)
-        .select("id");
-
-    if (resultado.error) {
-        console.error("Erro ao excluir:", resultado.error);
-
-        mensagemMateriais.textContent =
-            "Erro ao excluir: " + resultado.error.message;
-        return;
-    }
-
-    if (!resultado.data || resultado.data.length === 0) {
-        console.warn(
-            "Nenhum material foi excluído. ID:",
-            material.id
-        );
-
-        mensagemMateriais.textContent =
-            "Nenhum registro foi excluído. Verifique as permissões do Supabase.";
-        return;
-    }
-
-    mensagemMateriais.textContent =
-        "Material excluído com sucesso!";
-
-    await atualizarListaMateriais();
-
-} catch (erro) {
-    console.error("Falha inesperada ao excluir:", erro);
-
-    mensagemMateriais.textContent =
-        "Falha ao excluir. Consulte o Console do navegador.";
-}
-        });
-
-        itemLista.append(botaoEditar, botaoExcluir);
+            itemLista.appendChild(botaoExcluir);
+        }
 
         itemLista.style.borderBottom = "1px solid #ccc";
         itemLista.style.padding = "12px 0";
@@ -385,7 +366,6 @@ async function atualizarListaMateriais() {
         listaMateriais.appendChild(itemLista);
     });
 }
-
 /* LOGIN DA ÁREA DE MEMBROS */
 
 if (formularioLoginMembros) {
