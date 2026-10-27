@@ -415,7 +415,7 @@ if (botaoCadastrarMaterial) {
                 item: item,
                 quantidade: campoQuantidade.value.trim(),
                 categoria: campoCategoria.value.trim(),
-                status: campoStatus.value,
+                status: campoStatus.value.trim(),
                 observacao: campoObservacao.value.trim(),
                 autor_id: resultadoAcesso.user.id
             });
