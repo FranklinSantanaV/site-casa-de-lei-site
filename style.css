@@ -1422,3 +1422,118 @@ footer p + p {
         transition: none !important;
     }
 }
+
+
+/* ========================================
+   ÁREA DE MEMBROS — CASA DE LEI
+======================================== */
+
+#area-membros {
+    box-sizing: border-box;
+    width: min(100% - 32px, 440px);
+    margin: 55px auto;
+    padding: 34px 30px;
+    background: #ffffff;
+    border: 1px solid #e4e8e1;
+    border-top: 5px solid #c6a45b;
+    border-radius: 18px;
+    box-shadow: 0 12px 35px rgba(23, 63, 50, 0.10);
+    text-align: left;
+}
+
+#area-membros h2 {
+    margin: 0 0 12px;
+    color: #173f32;
+    font-size: 27px;
+    font-weight: 700;
+    text-align: center;
+}
+
+#area-membros > p {
+    margin: 0 0 28px;
+    color: #68736c;
+    font-size: 14px;
+    line-height: 1.6;
+    text-align: center;
+}
+
+#form-login-membros {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#form-login-membros label {
+    margin-top: 7px;
+    color: #29483b;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#form-login-membros input {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 47px;
+    padding: 12px 14px;
+    border: 1px solid #d9e0d8;
+    border-radius: 9px;
+    background: #fbfcfa;
+    color: #243b30;
+    font: inherit;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#form-login-membros input:focus {
+    border-color: #c6a45b;
+    box-shadow: 0 0 0 3px rgba(198, 164, 91, 0.18);
+    background: #ffffff;
+}
+
+#form-login-membros button {
+    width: 100%;
+    min-height: 48px;
+    margin-top: 15px;
+    padding: 13px 18px;
+    border: none;
+    border-radius: 9px;
+    background: #173f32;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+#form-login-membros button:hover {
+    background: #245844;
+    transform: translateY(-1px);
+}
+
+#form-login-membros button:focus-visible {
+    outline: 3px solid #c6a45b;
+    outline-offset: 3px;
+}
+
+#mensagem-login {
+    margin: 8px 0 0;
+    color: #a13b32;
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+/* Ajustes para celular */
+@media (max-width: 480px) {
+    #area-membros {
+        width: calc(100% - 24px);
+        margin: 30px auto;
+        padding: 27px 21px;
+        border-radius: 14px;
+    }
+
+    #area-membros h2 {
+        font-size: 24px;
+    }
+}
+
