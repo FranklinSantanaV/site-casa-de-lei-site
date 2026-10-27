@@ -337,24 +337,43 @@ async function atualizarListaMateriais() {
                 return;
             }
 
-            const resultado = await supabaseClient
-                .from("materiais_casa")
-                .delete()
-                .eq("id", material.id);
+            try {
+    const resultado = await supabaseClient
+        .from("materiais_casa")
+        .delete()
+        .eq("id", material.id)
+        .select("id");
 
-            if (resultado.error) {
-                mensagemMateriais.textContent =
-                    "Não foi possível excluir o material.";
-                console.error(
-                    "Erro ao excluir material:",
-                    resultado.error.message
-                );
-                return;
-            }
+    if (resultado.error) {
+        console.error("Erro ao excluir:", resultado.error);
 
-            await atualizarListaMateriais();
-            mensagemMateriais.textContent =
-                "Material excluído com sucesso!";
+        mensagemMateriais.textContent =
+            "Erro ao excluir: " + resultado.error.message;
+        return;
+    }
+
+    if (!resultado.data || resultado.data.length === 0) {
+        console.warn(
+            "Nenhum material foi excluído. ID:",
+            material.id
+        );
+
+        mensagemMateriais.textContent =
+            "Nenhum registro foi excluído. Verifique as permissões do Supabase.";
+        return;
+    }
+
+    mensagemMateriais.textContent =
+        "Material excluído com sucesso!";
+
+    await atualizarListaMateriais();
+
+} catch (erro) {
+    console.error("Falha inesperada ao excluir:", erro);
+
+    mensagemMateriais.textContent =
+        "Falha ao excluir. Consulte o Console do navegador.";
+}
         });
 
         itemLista.append(botaoEditar, botaoExcluir);
