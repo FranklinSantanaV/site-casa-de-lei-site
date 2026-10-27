@@ -208,3 +208,45 @@ async function listarMateriaisCasa() {
     return data;
 }
 
+ // ===== LOGIN DA ÁREA DE MEMBROS =====
+
+const formularioLoginMembros = document.getElementById("form-login-membros");
+
+if (formularioLoginMembros) {
+    formularioLoginMembros.addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const campoEmail = document.getElementById("email-membro");
+        const campoSenha = document.getElementById("senha-membro");
+        const mensagem = document.getElementById("mensagem-login");
+
+        mensagem.textContent = "Verificando acesso...";
+
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email: campoEmail.value.trim(),
+            password: campoSenha.value
+        });
+
+        if (error) {
+            mensagem.textContent = "Não foi possível entrar. Confira o e-mail e a senha.";
+            return;
+        }
+
+        const { data: perfil, error: erroPerfil } = await supabaseClient
+            .from("perfis_casa")
+            .select("nome_usuario, aprovado, administrador")
+            .eq("id", data.user.id)
+            .maybeSingle();
+
+        if (erroPerfil || !perfil || !perfil.aprovado) {
+            await supabaseClient.auth.signOut();
+            mensagem.textContent = "Acesso pendente de aprovação pela administração.";
+            return;
+        }
+
+        mensagem.textContent = perfil.administrador
+            ? "Login realizado! Bem-vindo à administração da Casa de Lei."
+            : "Login realizado! Bem-vindo à Área dos Membros.";
+    });
+}
+
