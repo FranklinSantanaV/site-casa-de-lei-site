@@ -444,48 +444,65 @@ if (botaoCadastrarMaterial) {
         }
 
        
-let resultadoGravacao;
+        let resultadoGravacao;
 
-if (materialEmEdicao !== null) {
-    resultadoGravacao = await supabaseClient
-        .from("materiais_casa")
-        .update({
-            item: item,
-            quantidade: campoQuantidade.value.trim(),
-            categoria: campoCategoria.value.trim(),
-            status: campoStatus.value.trim(),
-            observacao: campoObservacao.value.trim()
-        })
-        .eq("id", materialEmEdicao);
-} else {
-    resultadoGravacao = await supabaseClient
-        .from("materiais_casa")
-        .insert({
-            item: item,
-            quantidade: campoQuantidade.value.trim(),
-            categoria: campoCategoria.value.trim(),
-            status: campoStatus.value.trim(),
-            observacao: campoObservacao.value.trim(),
-            autor_id: resultadoAcesso.user.id
-        });
-}
+        try {
+            if (materialEmEdicao !== null) {
+                resultadoGravacao = await supabaseClient
+                    .from("materiais_casa")
+                    .update({
+                        item: item,
+                        quantidade: campoQuantidade.value.trim(),
+                        categoria: campoCategoria.value.trim(),
+                        status: campoStatus.value.trim(),
+                        observacao: campoObservacao.value.trim()
+                    })
+                    .eq("id", materialEmEdicao);
+            } else {
+                resultadoGravacao = await supabaseClient
+                    .from("materiais_casa")
+                    .insert({
+                        item: item,
+                        quantidade: campoQuantidade.value.trim(),
+                        categoria: campoCategoria.value.trim(),
+                        status: campoStatus.value.trim(),
+                        observacao: campoObservacao.value.trim(),
+                        autor_id: resultadoAcesso.user.id
+                    });
+            }
+        } catch (erro) {
+            console.error("Erro ao salvar material:", erro);
+            mensagemMateriais.textContent =
+                "Ocorreu um erro ao salvar. Tente novamente.";
+            return;
+        }
 
-const error = resultadoGravacao.error;
+        if (resultadoGravacao.error) {
+            console.error(
+                "Erro ao salvar material:",
+                resultadoGravacao.error.message
+            );
+            mensagemMateriais.textContent =
+                "Não foi possível salvar: " +
+                resultadoGravacao.error.message;
+            return;
+        }
 
-materialEmEdicao = null;
+        materialEmEdicao = null;
 
-campoItem.value = "";
-campoQuantidade.value = "";
-campoCategoria.value = "";
-campoStatus.value = "Pendente";
-campoObservacao.value = "";
+        campoItem.value = "";
+        campoQuantidade.value = "";
+        campoCategoria.value = "";
+        campoStatus.value = "Pendente";
+        campoObservacao.value = "";
 
-mensagemMateriais.textContent =
-    "Material salvo com sucesso!";
+        botaoCadastrarMaterial.textContent = "Cadastrar material";
 
-botaoCadastrarMaterial.textContent = "Cadastrar material";
+        mensagemMateriais.textContent =
+            "Material salvo com sucesso!";
 
-await atualizarListaMateriais();
+        await atualizarListaMateriais();
+
     });
 }
 
