@@ -233,16 +233,14 @@ function mostrarPainelAdministrativo(mostrar) {
 
 
 async function atualizarListaMateriais() {
-    if (!listaMateriais || !mensagemMateriais) {
-        return;
-    }
+    if (!listaMateriais || !mensagemMateriais) return;
 
     listaMateriais.replaceChildren();
     mensagemMateriais.textContent = "Carregando materiais...";
 
-    const resultadoAcesso = await verificarAcessoMateriais();
+    const acesso = await verificarAcessoMateriais();
 
-    if (!resultadoAcesso || !resultadoAcesso.perfil.administrador) {
+    if (!acesso || !acesso.perfil.administrador) {
         mensagemMateriais.textContent =
             "Acesso administrativo não autorizado.";
         mostrarPainelAdministrativo(false);
@@ -253,7 +251,7 @@ async function atualizarListaMateriais() {
 
     if (materiais === null) {
         mensagemMateriais.textContent =
-            "Não foi possível carregar os materiais. Verifique as permissões do Supabase.";
+            "Não foi possível carregar os materiais.";
         return;
     }
 
@@ -268,19 +266,23 @@ async function atualizarListaMateriais() {
 
     materiais.forEach(function (material) {
         const itemLista = document.createElement("article");
-        const titulo = document.createElement("h4");
-        const quantidade = document.createElement("p");
-        const categoria = document.createElement("p");
-        const status = document.createElement("p");
-        const observacao = document.createElement("p");
 
+        const titulo = document.createElement("h4");
         titulo.textContent = material.item || "Material sem nome";
+
+        const quantidade = document.createElement("p");
         quantidade.textContent =
             "Quantidade: " + (material.quantidade || "Não informada");
+
+        const categoria = document.createElement("p");
         categoria.textContent =
             "Categoria: " + (material.categoria || "Não informada");
+
+        const status = document.createElement("p");
         status.textContent =
             "Situação: " + (material.status || "Não informada");
+
+        const observacao = document.createElement("p");
         observacao.textContent =
             "Observações: " + (material.observacao || "Nenhuma");
 
@@ -295,66 +297,18 @@ async function atualizarListaMateriais() {
         const botaoEditar = document.createElement("button");
         botaoEditar.type = "button";
         botaoEditar.textContent = "Editar";
-        const botaoExcluir = document.createElement("button");
-botaoExcluir.type = "button";
-botaoExcluir.textContent = "Excluir";
-
-botaoExcluir.addEventListener("click", async function () {
-    const confirmar = window.confirm(
-        "Tem certeza de que deseja excluir este material?"
-    );
-
-    if (!confirmar) {
-        return;
-    }
-
-    const resultadoAcesso = await verificarAcessoMateriais();
-
-    if (!resultadoAcesso || !resultadoAcesso.perfil.administrador) {
-        mensagemMateriais.textContent =
-            "Você não tem autorização para excluir materiais.";
-        return;
-    }
-
-    const resultado = await supabaseClient
-        .from("materiais_casa")
-        .delete()
-        .eq("id", material.id);
-
-    if (resultado.error) {
-        mensagemMateriais.textContent =
-            "Não foi possível excluir o material. Tente novamente.";
-        console.error(
-            "Erro ao excluir material:",
-            resultado.error.message
-        );
-        return;
-    }
-
-    mensagemMateriais.textContent =
-        "Material excluído com sucesso!";
-
-    await atualizarListaMateriais();
-});
-
-
-itemLista.appendChild(botaoExcluir);
 
         botaoEditar.addEventListener("click", function () {
             materialEmEdicao = material.id;
 
             document.getElementById("material-item").value =
                 material.item || "";
-
             document.getElementById("material-quantidade").value =
                 material.quantidade || "";
-
             document.getElementById("material-categoria").value =
                 material.categoria || "";
-
             document.getElementById("material-status").value =
                 material.status || "Pendente";
-
             document.getElementById("material-observacao").value =
                 material.observacao || "";
 
@@ -364,7 +318,46 @@ itemLista.appendChild(botaoExcluir);
                 "Edite os campos acima e clique em Salvar alterações.";
         });
 
-        itemLista.appendChild(botaoEditar);
+        const botaoExcluir = document.createElement("button");
+        botaoExcluir.type = "button";
+        botaoExcluir.textContent = "Excluir";
+
+        botaoExcluir.addEventListener("click", async function () {
+            const confirmar = window.confirm(
+                "Tem certeza de que deseja excluir este material?"
+            );
+
+            if (!confirmar) return;
+
+            const acessoAtual = await verificarAcessoMateriais();
+
+            if (!acessoAtual || !acessoAtual.perfil.administrador) {
+                mensagemMateriais.textContent =
+                    "Você não tem autorização para excluir materiais.";
+                return;
+            }
+
+            const resultado = await supabaseClient
+                .from("materiais_casa")
+                .delete()
+                .eq("id", material.id);
+
+            if (resultado.error) {
+                mensagemMateriais.textContent =
+                    "Não foi possível excluir o material.";
+                console.error(
+                    "Erro ao excluir material:",
+                    resultado.error.message
+                );
+                return;
+            }
+
+            await atualizarListaMateriais();
+            mensagemMateriais.textContent =
+                "Material excluído com sucesso!";
+        });
+
+        itemLista.append(botaoEditar, botaoExcluir);
 
         itemLista.style.borderBottom = "1px solid #ccc";
         itemLista.style.padding = "12px 0";
@@ -372,7 +365,6 @@ itemLista.appendChild(botaoExcluir);
         listaMateriais.appendChild(itemLista);
     });
 }
-
 
 /* LOGIN DA ÁREA DE MEMBROS */
 
