@@ -295,6 +295,50 @@ async function atualizarListaMateriais() {
         const botaoEditar = document.createElement("button");
         botaoEditar.type = "button";
         botaoEditar.textContent = "Editar";
+        const botaoExcluir = document.createElement("button");
+botaoExcluir.type = "button";
+botaoExcluir.textContent = "Excluir";
+
+botaoExcluir.addEventListener("click", async function () {
+    const confirmar = window.confirm(
+        "Tem certeza de que deseja excluir este material?"
+    );
+
+    if (!confirmar) {
+        return;
+    }
+
+    const resultadoAcesso = await verificarAcessoMateriais();
+
+    if (!resultadoAcesso || !resultadoAcesso.perfil.administrador) {
+        mensagemMateriais.textContent =
+            "Você não tem autorização para excluir materiais.";
+        return;
+    }
+
+    const resultado = await supabaseClient
+        .from("materiais_casa")
+        .delete()
+        .eq("id", material.id);
+
+    if (resultado.error) {
+        mensagemMateriais.textContent =
+            "Não foi possível excluir o material. Tente novamente.";
+        console.error(
+            "Erro ao excluir material:",
+            resultado.error.message
+        );
+        return;
+    }
+
+    mensagemMateriais.textContent =
+        "Material excluído com sucesso!";
+
+    await atualizarListaMateriais();
+});
+});
+
+itemLista.appendChild(botaoExcluir);
 
         botaoEditar.addEventListener("click", function () {
             materialEmEdicao = material.id;
