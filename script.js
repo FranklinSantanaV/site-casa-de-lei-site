@@ -323,6 +323,10 @@ itemLista.appendChild(botaoEditar);
         itemLista.style.padding = "12px 0";
 
         listaMateriais.appendChild(itemLista);
+        itemLista.style.borderBottom = "1px solid #ccc";
+itemLista.style.padding = "12px 0";
+
+listaMateriais.appendChild(itemLista);
     });
 }
 
