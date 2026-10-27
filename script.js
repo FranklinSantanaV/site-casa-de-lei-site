@@ -240,11 +240,12 @@ async function atualizarListaMateriais() {
 
     const acesso = await verificarAcessoMateriais();
 
-    if (!acesso || !acesso.perfil.administrador) {
-        mensagemMateriais.textContent =
-            "Acesso administrativo não autorizado.";
-        mostrarPainelAdministrativo(false);
-        return;
+    if (!acesso) {
+    mensagemMateriais.textContent =
+        "Você precisa entrar com uma conta de membro aprovada.";
+    mostrarPainelAdministrativo(false);
+    return;
+}
     }
 
     const materiais = await listarMateriaisCasa();
@@ -433,16 +434,11 @@ if (formularioLoginMembros) {
                 return;
             }
 
-            if (perfil.administrador) {
-                mensagemLogin.textContent =
-                    "Login realizado! Bem-vindo à administração da Casa de Lei.";
+          mensagemLogin.textContent =
+    "Login realizado! Bem-vindo à Área de Membros da Casa de Lei.";
 
-                mostrarPainelAdministrativo(true);
-                await atualizarListaMateriais();
-            } else {
-                mensagemLogin.textContent =
-                    "Login realizado! Bem-vindo à Área dos Membros.";
-            }
+mostrarPainelAdministrativo(true);
+await atualizarListaMateriais();
         }
     );
 }
@@ -490,13 +486,12 @@ if (botaoCadastrarMaterial) {
 
         const resultadoAcesso = await verificarAcessoMateriais();
 
-        if (!resultadoAcesso ||
-            !resultadoAcesso.perfil.administrador) {
-            mensagemMateriais.textContent =
-                "Você não tem autorização para cadastrar materiais.";
-            mostrarPainelAdministrativo(false);
-            return;
-        }
+       if (!resultadoAcesso) {
+    mensagemMateriais.textContent =
+        "Você precisa entrar com uma conta de membro aprovada.";
+    mostrarPainelAdministrativo(false);
+    return;
+}
 
        
         let resultadoGravacao;
