@@ -1144,3 +1144,281 @@ footer p + p {
         transform: none;
     }
 }
+
+
+
+/* ========================================
+   PAINEL ADMINISTRATIVO — CASA DE LEI
+======================================== */
+
+#painel-administrativo {
+    --admin-verde: #173f32;
+    --admin-verde-escuro: #102d24;
+    --admin-dourado: #c6a45b;
+    --admin-fundo: #f7f8f5;
+    --admin-texto: #34443c;
+
+    background: var(--admin-fundo);
+    color: var(--admin-texto);
+    border: 1px solid #e4e8e1;
+    border-top: 5px solid var(--admin-dourado);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 8px 28px rgba(20, 50, 38, 0.08);
+}
+
+#painel-administrativo h2,
+#painel-administrativo h3 {
+    color: var(--admin-verde);
+}
+
+#painel-administrativo h2 {
+    margin-bottom: 8px;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+}
+
+#painel-administrativo h3 {
+    margin-bottom: 5px;
+    font-size: 1.2rem;
+}
+
+#painel-administrativo p {
+    line-height: 1.6;
+}
+
+#painel-administrativo .admin-cabecalho {
+    padding: 8px 0 28px;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #e1e6de;
+}
+
+#painel-administrativo .admin-etiqueta {
+    display: inline-block;
+    margin-bottom: 10px;
+    color: #94752f;
+    font-size: 0.75rem;
+    font-weight: bold;
+    letter-spacing: 3px;
+}
+
+#painel-administrativo .admin-cartao {
+    margin-bottom: 25px;
+    padding: 26px;
+    background: #ffffff;
+    border: 1px solid #e1e6de;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(20, 50, 38, 0.04);
+}
+
+#painel-administrativo .admin-titulo-secao {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 22px;
+}
+
+#painel-administrativo .admin-titulo-secao h3 {
+    margin: 0 0 4px;
+}
+
+#painel-administrativo .admin-titulo-secao p {
+    color: #69766e;
+    font-size: 0.92rem;
+}
+
+#painel-administrativo .admin-icone {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: #edf3ed;
+    color: var(--admin-verde);
+    font-size: 1.7rem;
+}
+
+#painel-administrativo .admin-formulario {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+#painel-administrativo .admin-campo {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+#painel-administrativo .admin-campo-completo {
+    grid-column: 1 / -1;
+}
+
+#painel-administrativo .admin-campo label {
+    color: var(--admin-verde);
+    font-size: 0.92rem;
+    font-weight: bold;
+}
+
+#painel-administrativo .admin-campo input,
+#painel-administrativo .admin-campo select,
+#painel-administrativo .admin-campo textarea {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 1px solid #d7ded5;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #28382f;
+    font: inherit;
+    font-size: 0.96rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#painel-administrativo .admin-campo textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+#painel-administrativo .admin-campo input:focus,
+#painel-administrativo .admin-campo select:focus,
+#painel-administrativo .admin-campo textarea:focus {
+    outline: none;
+    border-color: var(--admin-verde);
+    box-shadow: 0 0 0 3px rgba(23, 63, 50, 0.12);
+}
+
+#painel-administrativo .admin-botao {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 11px 18px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font: inherit;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+#painel-administrativo .admin-botao:hover {
+    transform: translateY(-1px);
+}
+
+#painel-administrativo .admin-botao-principal {
+    margin-top: 22px;
+    background: var(--admin-verde);
+    color: #ffffff;
+    border-color: var(--admin-dourado);
+}
+
+#painel-administrativo .admin-botao-principal:hover {
+    background: var(--admin-verde-escuro);
+}
+
+#painel-administrativo .admin-lista-cabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+#painel-administrativo .admin-lista-cabecalho .admin-titulo-secao {
+    margin-bottom: 0;
+}
+
+#painel-administrativo .admin-botao-secundario {
+    background: #ffffff;
+    color: var(--admin-verde);
+    border-color: #cbd6ca;
+}
+
+#painel-administrativo .admin-botao-secundario:hover {
+    background: #edf3ed;
+}
+
+#painel-administrativo #lista-materiais {
+    overflow-wrap: anywhere;
+}
+
+#painel-administrativo #lista-materiais button {
+    margin: 6px 6px 6px 0;
+    padding: 9px 13px;
+    border-radius: 7px;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#painel-administrativo #lista-materiais button:focus-visible,
+#painel-administrativo .admin-botao:focus-visible {
+    outline: 3px solid #c6a45b;
+    outline-offset: 3px;
+}
+
+#painel-administrativo #mensagem-materiais {
+    margin-top: 12px;
+    font-size: 0.95rem;
+}
+
+#painel-administrativo .admin-botao-sair {
+    background: #ffffff;
+    color: #7b3434;
+    border-color: #e5caca;
+}
+
+#painel-administrativo .admin-botao-sair:hover {
+    background: #fbefef;
+}
+
+/* Ajustes para telas menores */
+
+@media (max-width: 600px) {
+    #painel-administrativo {
+        padding: 20px 14px;
+        border-radius: 12px;
+    }
+
+    #painel-administrativo .admin-cartao {
+        padding: 20px 15px;
+    }
+
+    #painel-administrativo .admin-formulario {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    #painel-administrativo .admin-campo-completo {
+        grid-column: auto;
+    }
+
+    #painel-administrativo .admin-lista-cabecalho {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    #painel-administrativo .admin-botao-secundario {
+        width: 100%;
+    }
+
+    #painel-administrativo .admin-botao-principal {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #painel-administrativo *,
+    #painel-administrativo *::before,
+    #painel-administrativo *::after {
+        transition: none !important;
+    }
+}
