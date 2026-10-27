@@ -290,6 +290,34 @@ async function atualizarListaMateriais() {
             status,
             observacao
         );
+        
+const botaoEditar = document.createElement("button");
+botaoEditar.type = "button";
+botaoEditar.textContent = "Editar";
+
+botaoEditar.addEventListener("click", function () {
+    materialEmEdicao = material.id;
+    document.getElementById("material-item").value =
+        material.item || "";
+
+    document.getElementById("material-quantidade").value =
+        material.quantidade || "";
+
+    document.getElementById("material-categoria").value =
+        material.categoria || "";
+
+    document.getElementById("material-status").value =
+        material.status || "Pendente";
+
+    document.getElementById("material-observacao").value =
+        material.observacao || "";
+
+    mensagemMateriais.textContent =
+        "Edite os campos do material e salve as alterações.";
+});
+
+itemLista.appendChild(botaoEditar);
+
 
         itemLista.style.borderBottom = "1px solid #ccc";
         itemLista.style.padding = "12px 0";
@@ -362,6 +390,8 @@ if (formularioLoginMembros) {
 
 /* CADASTRAR MATERIAL */
 
+let materialEmEdicao = null;
+
 const botaoCadastrarMaterial =
     document.getElementById("cadastrar-material");
 
@@ -409,33 +439,49 @@ if (botaoCadastrarMaterial) {
             return;
         }
 
-        const { error } = await supabaseClient
-            .from("materiais_casa")
-            .insert({
-                item: item,
-                quantidade: campoQuantidade.value.trim(),
-                categoria: campoCategoria.value.trim(),
-                status: campoStatus.value.trim(),
-                observacao: campoObservacao.value.trim(),
-                autor_id: resultadoAcesso.user.id
-            });
+       
+let resultadoGravacao;
 
-        if (error) {
-            console.error("Erro ao cadastrar material:", error.message);
-            mensagemMateriais.textContent =
-                "Não foi possível cadastrar. Verifique as permissões da tabela no Supabase.";
-            return;
-        }
+if (materialEmEdicao !== null) {
+    resultadoGravacao = await supabaseClient
+        .from("materiais_casa")
+        .update({
+            item: item,
+            quantidade: campoQuantidade.value.trim(),
+            categoria: campoCategoria.value.trim(),
+            status: campoStatus.value.trim(),
+            observacao: campoObservacao.value.trim()
+        })
+        .eq("id", materialEmEdicao);
+} else {
+    resultadoGravacao = await supabaseClient
+        .from("materiais_casa")
+        .insert({
+            item: item,
+            quantidade: campoQuantidade.value.trim(),
+            categoria: campoCategoria.value.trim(),
+            status: campoStatus.value.trim(),
+            observacao: campoObservacao.value.trim(),
+            autor_id: resultadoAcesso.user.id
+        });
+}
 
-        campoItem.value = "";
-        campoQuantidade.value = "";
-        campoCategoria.value = "";
-        campoObservacao.value = "";
+const error = resultadoGravacao.error;
 
-        mensagemMateriais.textContent =
-            "Material cadastrado com sucesso!";
+materialEmEdicao = null;
 
-        await atualizarListaMateriais();
+campoItem.value = "";
+campoQuantidade.value = "";
+campoCategoria.value = "";
+campoStatus.value = "Pendente";
+campoObservacao.value = "";
+
+mensagemMateriais.textContent =
+    "Material salvo com sucesso!";
+
+botaoCadastrarMaterial.textContent = "Cadastrar material";
+
+await atualizarListaMateriais();
     });
 }
 
