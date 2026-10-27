@@ -77,43 +77,90 @@
 </section>
 
 <!-- PAINEL ADMINISTRATIVO -->
+
 <section id="painel-administrativo" hidden>
-    <h2>Painel Administrativo</h2>
-    <p>Controle de materiais da Casa de Lei.</p>
+    <div class="admin-cabecalho">
+        <span class="admin-etiqueta">CASA DE LEI</span>
+        <h2>Painel Administrativo</h2>
+        <p>Gerencie os materiais e acompanhe as necessidades da casa.</p>
+    </div>
 
-    <h3>Cadastrar material</h3>
+    <div class="admin-cartao">
+        <div class="admin-titulo-secao">
+            <span class="admin-icone">＋</span>
+            <div>
+                <h3>Cadastrar material</h3>
+                <p>Preencha os dados do material abaixo.</p>
+            </div>
+        </div>
 
-    <label for="material-item">Nome do material</label>
-    <input type="text" id="material-item" placeholder="Ex.: Velas">
+        <div class="admin-formulario">
+            <div class="admin-campo">
+                <label for="material-item">Nome do material</label>
+                <input type="text" id="material-item"
+                    placeholder="Ex.: Velas">
+            </div>
 
-    <label for="material-quantidade">Quantidade</label>
-    <input type="text" id="material-quantidade" placeholder="Ex.: 20 unidades">
+            <div class="admin-campo">
+                <label for="material-quantidade">Quantidade</label>
+                <input type="text" id="material-quantidade"
+                    placeholder="Ex.: 20 unidades">
+            </div>
 
-    <label for="material-categoria">Categoria</label>
-    <input type="text" id="material-categoria" placeholder="Ex.: Material religioso">
+            <div class="admin-campo">
+                <label for="material-categoria">Categoria</label>
+                <input type="text" id="material-categoria"
+                    placeholder="Ex.: Material religioso">
+            </div>
 
-    <label for="material-status">Situação</label>
-    
-<select id="material-status">
-    <option value="Pendente">Pendente</option>
-    <option value="Resolvido">Resolvido</option>
-</select>
+            <div class="admin-campo">
+                <label for="material-status">Situação</label>
+                <select id="material-status">
+                    <option value="Pendente">Pendente</option>
+                    <option value="Resolvido">Resolvido</option>
+                </select>
+            </div>
 
+            <div class="admin-campo admin-campo-completo">
+                <label for="material-observacao">Observações</label>
+                <textarea id="material-observacao"
+                    placeholder="Informações adicionais"></textarea>
+            </div>
+        </div>
 
-    <label for="material-observacao">Observações</label>
-    <textarea id="material-observacao" placeholder="Informações adicionais"></textarea>
+        <button type="button" id="cadastrar-material"
+            class="admin-botao admin-botao-principal">
+            Cadastrar material
+        </button>
 
-    <button type="button" id="cadastrar-material">Cadastrar material</button>
-    <p id="mensagem-materiais" role="status"></p>
+        <p id="mensagem-materiais" role="status"></p>
+    </div>
 
-    <hr>
+    <div class="admin-cartao admin-cartao-lista">
+        <div class="admin-lista-cabecalho">
+            <div class="admin-titulo-secao">
+                <span class="admin-icone">▤</span>
+                <div>
+                    <h3>Materiais cadastrados</h3>
+                    <p>Consulte e gerencie os materiais da casa.</p>
+                </div>
+            </div>
 
-    <h3>Materiais cadastrados</h3>
-    <button type="button" id="atualizar-materiais">Atualizar lista</button>
-    <div id="lista-materiais"></div>
+            <button type="button" id="atualizar-materiais"
+                class="admin-botao admin-botao-secundario">
+                ↻ Atualizar lista
+            </button>
+        </div>
 
-    <button type="button" id="sair-administracao">Sair da conta</button>
+        <div id="lista-materiais"></div>
+    </div>
+
+    <button type="button" id="sair-administracao"
+        class="admin-botao admin-botao-sair">
+        Sair da conta
+    </button>
 </section>
+
 
 <!-- INÍCIO -->
 
