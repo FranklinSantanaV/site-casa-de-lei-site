@@ -336,7 +336,7 @@ botaoExcluir.addEventListener("click", async function () {
 
     await atualizarListaMateriais();
 });
-});
+
 
 itemLista.appendChild(botaoExcluir);
 
