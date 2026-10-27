@@ -163,15 +163,15 @@ document.querySelectorAll(".titulo-recolhivel").forEach(function (botao) {
         sinal.textContent = aberto ? "＋" : "−";
     });
 });
-// ===== CONTROLE DE MATERIAIS DA CASA =====
+
+/* ===== CONTROLE DE MATERIAIS E LOGIN ===== */
 
 async function verificarAcessoMateriais() {
     const { data: { user }, error } =
         await supabaseClient.auth.getUser();
 
     if (error || !user) {
-        console.log("Usuário não está conectado.");
-        return;
+        return null;
     }
 
     const { data: perfil, error: erroPerfil } =
@@ -181,18 +181,14 @@ async function verificarAcessoMateriais() {
             .eq("id", user.id)
             .maybeSingle();
 
-    if (erroPerfil) {
-        console.error("Erro ao consultar perfil:", erroPerfil.message);
-        return;
+    if (erroPerfil || !perfil || !perfil.aprovado) {
+        return null;
     }
 
-    if (!perfil || !perfil.aprovado) {
-        console.log("Acesso pendente de aprovação.");
-        return;
-    }
-
-    console.log("Acesso autorizado:", perfil.nome_usuario);
+    return { user, perfil };
 }
+
+/* LISTAR MATERIAIS */
 
 async function listarMateriaisCasa() {
     const { data, error } = await supabaseClient
@@ -202,51 +198,299 @@ async function listarMateriaisCasa() {
 
     if (error) {
         console.error("Erro ao listar materiais:", error.message);
-        return [];
+        return null;
     }
 
     return data;
 }
 
- // ===== LOGIN DA ÁREA DE MEMBROS =====
+/* ELEMENTOS DO PAINEL */
 
-const formularioLoginMembros = document.getElementById("form-login-membros");
+const formularioLoginMembros =
+    document.getElementById("form-login-membros");
 
-if (formularioLoginMembros) {
-    formularioLoginMembros.addEventListener("submit", async function(event) {
-        event.preventDefault();
+const painelAdministrativo =
+    document.getElementById("painel-administrativo");
 
-        const campoEmail = document.getElementById("email-membro");
-        const campoSenha = document.getElementById("senha-membro");
-        const mensagem = document.getElementById("mensagem-login");
+const mensagemLogin =
+    document.getElementById("mensagem-login");
 
-        mensagem.textContent = "Verificando acesso...";
+const mensagemMateriais =
+    document.getElementById("mensagem-materiais");
 
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
-            email: campoEmail.value.trim(),
-            password: campoSenha.value
-        });
+const listaMateriais =
+    document.getElementById("lista-materiais");
 
-        if (error) {
-            mensagem.textContent = "Não foi possível entrar. Confira o e-mail e a senha.";
-            return;
-        }
+/* MOSTRAR OU OCULTAR O PAINEL */
 
-        const { data: perfil, error: erroPerfil } = await supabaseClient
-            .from("perfis_casa")
-            .select("nome_usuario, aprovado, administrador")
-            .eq("id", data.user.id)
-            .maybeSingle();
+function mostrarPainelAdministrativo(mostrar) {
+    if (painelAdministrativo) {
+        painelAdministrativo.hidden = !mostrar;
+    }
+}
 
-        if (erroPerfil || !perfil || !perfil.aprovado) {
-            await supabaseClient.auth.signOut();
-            mensagem.textContent = "Acesso pendente de aprovação pela administração.";
-            return;
-        }
+/* EXIBIR A LISTA DE MATERIAIS */
 
-        mensagem.textContent = perfil.administrador
-            ? "Login realizado! Bem-vindo à administração da Casa de Lei."
-            : "Login realizado! Bem-vindo à Área dos Membros.";
+async function atualizarListaMateriais() {
+    if (!listaMateriais || !mensagemMateriais) {
+        return;
+    }
+
+    listaMateriais.replaceChildren();
+    mensagemMateriais.textContent = "Carregando materiais...";
+
+    const resultadoAcesso = await verificarAcessoMateriais();
+
+    if (!resultadoAcesso || !resultadoAcesso.perfil.administrador) {
+        mensagemMateriais.textContent =
+            "Acesso administrativo não autorizado.";
+        mostrarPainelAdministrativo(false);
+        return;
+    }
+
+    const materiais = await listarMateriaisCasa();
+
+    if (materiais === null) {
+        mensagemMateriais.textContent =
+            "Não foi possível carregar os materiais. Verifique as permissões do Supabase.";
+        return;
+    }
+
+    if (materiais.length === 0) {
+        mensagemMateriais.textContent =
+            "Nenhum material cadastrado ainda.";
+        return;
+    }
+
+    mensagemMateriais.textContent =
+        "Materiais encontrados: " + materiais.length;
+
+    materiais.forEach(function (material) {
+        const itemLista = document.createElement("article");
+        const titulo = document.createElement("h4");
+        const quantidade = document.createElement("p");
+        const categoria = document.createElement("p");
+        const status = document.createElement("p");
+        const observacao = document.createElement("p");
+
+        titulo.textContent = material.item || "Material sem nome";
+        quantidade.textContent =
+            "Quantidade: " + (material.quantidade || "Não informada");
+        categoria.textContent =
+            "Categoria: " + (material.categoria || "Não informada");
+        status.textContent =
+            "Situação: " + (material.status || "Não informada");
+        observacao.textContent =
+            "Observações: " + (material.observacao || "Nenhuma");
+
+        itemLista.append(
+            titulo,
+            quantidade,
+            categoria,
+            status,
+            observacao
+        );
+
+        itemLista.style.borderBottom = "1px solid #ccc";
+        itemLista.style.padding = "12px 0";
+
+        listaMateriais.appendChild(itemLista);
     });
 }
 
+/* LOGIN DA ÁREA DE MEMBROS */
+
+if (formularioLoginMembros) {
+    formularioLoginMembros.addEventListener(
+        "submit",
+        async function (event) {
+            event.preventDefault();
+
+            const campoEmail =
+                document.getElementById("email-membro");
+
+            const campoSenha =
+                document.getElementById("senha-membro");
+
+            if (!campoEmail || !campoSenha || !mensagemLogin) {
+                return;
+            }
+
+            mensagemLogin.textContent = "Verificando acesso...";
+            mostrarPainelAdministrativo(false);
+
+            const { data, error } =
+                await supabaseClient.auth.signInWithPassword({
+                    email: campoEmail.value.trim(),
+                    password: campoSenha.value
+                });
+
+            if (error) {
+                mensagemLogin.textContent =
+                    "Não foi possível entrar. Confira o e-mail e a senha.";
+                return;
+            }
+
+            const { data: perfil, error: erroPerfil } =
+                await supabaseClient
+                    .from("perfis_casa")
+                    .select("nome_usuario, aprovado, administrador")
+                    .eq("id", data.user.id)
+                    .maybeSingle();
+
+            if (erroPerfil || !perfil || !perfil.aprovado) {
+                await supabaseClient.auth.signOut();
+
+                mensagemLogin.textContent =
+                    "Acesso pendente de aprovação pela administração.";
+                return;
+            }
+
+            if (perfil.administrador) {
+                mensagemLogin.textContent =
+                    "Login realizado! Bem-vindo à administração da Casa de Lei.";
+
+                mostrarPainelAdministrativo(true);
+                await atualizarListaMateriais();
+            } else {
+                mensagemLogin.textContent =
+                    "Login realizado! Bem-vindo à Área dos Membros.";
+            }
+        }
+    );
+}
+
+/* CADASTRAR MATERIAL */
+
+const botaoCadastrarMaterial =
+    document.getElementById("cadastrar-material");
+
+if (botaoCadastrarMaterial) {
+    botaoCadastrarMaterial.addEventListener("click", async function () {
+        const campoItem = document.getElementById("material-item");
+        const campoQuantidade =
+            document.getElementById("material-quantidade");
+        const campoCategoria =
+            document.getElementById("material-categoria");
+        const campoStatus =
+            document.getElementById("material-status");
+        const campoObservacao =
+            document.getElementById("material-observacao");
+
+        if (
+            !campoItem ||
+            !campoQuantidade ||
+            !campoCategoria ||
+            !campoStatus ||
+            !campoObservacao ||
+            !mensagemMateriais
+        ) {
+            return;
+        }
+
+        const item = campoItem.value.trim();
+
+        if (!item) {
+            mensagemMateriais.textContent =
+                "Informe o nome do material.";
+            campoItem.focus();
+            return;
+        }
+
+        mensagemMateriais.textContent = "Salvando material...";
+
+        const resultadoAcesso = await verificarAcessoMateriais();
+
+        if (!resultadoAcesso ||
+            !resultadoAcesso.perfil.administrador) {
+            mensagemMateriais.textContent =
+                "Você não tem autorização para cadastrar materiais.";
+            mostrarPainelAdministrativo(false);
+            return;
+        }
+
+        const { error } = await supabaseClient
+            .from("materiais_casa")
+            .insert({
+                item: item,
+                quantidade: campoQuantidade.value.trim(),
+                categoria: campoCategoria.value.trim(),
+                status: campoStatus.value,
+                observacao: campoObservacao.value.trim(),
+                autor_id: resultadoAcesso.user.id
+            });
+
+        if (error) {
+            console.error("Erro ao cadastrar material:", error.message);
+            mensagemMateriais.textContent =
+                "Não foi possível cadastrar. Verifique as permissões da tabela no Supabase.";
+            return;
+        }
+
+        campoItem.value = "";
+        campoQuantidade.value = "";
+        campoCategoria.value = "";
+        campoObservacao.value = "";
+
+        mensagemMateriais.textContent =
+            "Material cadastrado com sucesso!";
+
+        await atualizarListaMateriais();
+    });
+}
+
+/* ATUALIZAR A LISTA */
+
+const botaoAtualizarMateriais =
+    document.getElementById("atualizar-materiais");
+
+if (botaoAtualizarMateriais) {
+    botaoAtualizarMateriais.addEventListener("click", async function () {
+        await atualizarListaMateriais();
+    });
+}
+
+/* SAIR DA CONTA */
+
+const botaoSairAdministracao =
+    document.getElementById("sair-administracao");
+
+if (botaoSairAdministracao) {
+    botaoSairAdministracao.addEventListener("click", async function () {
+        if (mensagemLogin) {
+            mensagemLogin.textContent = "Saindo da conta...";
+        }
+
+        const { error } = await supabaseClient.auth.signOut();
+
+        if (error) {
+            if (mensagemLogin) {
+                mensagemLogin.textContent =
+                    "Não foi possível sair. Tente novamente.";
+            }
+            return;
+        }
+
+        mostrarPainelAdministrativo(false);
+
+        if (mensagemLogin) {
+            mensagemLogin.textContent = "Você saiu da sua conta.";
+        }
+
+        if (formularioLoginMembros) {
+            formularioLoginMembros.reset();
+        }
+
+        if (listaMateriais) {
+            listaMateriais.replaceChildren();
+        }
+
+        if (mensagemMateriais) {
+            mensagemMateriais.textContent = "";
+        }
+    });
+}
+
+/* MANTER O PAINEL OCULTO AO ABRIR A PÁGINA */
+
+mostrarPainelAdministrativo(false);
