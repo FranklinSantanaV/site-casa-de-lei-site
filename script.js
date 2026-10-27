@@ -135,17 +135,56 @@ if (botaoMenu && menuPrincipal) {
         }
     });
 
-    menuPrincipal.querySelectorAll("a").forEach(function (link) {
-        link.addEventListener("click", function () {
-            menuPrincipal.classList.add("menu-fechado");
-            botaoMenu.setAttribute("aria-expanded", "false");
-            botaoMenu.setAttribute("aria-label", "Abrir menu");
+  
+menuPrincipal.querySelectorAll("a").forEach(function (link) {
+    link.addEventListener("click", function () {
+        menuPrincipal.classList.add("menu-fechado");
+        botaoMenu.setAttribute("aria-expanded", "false");
+        botaoMenu.setAttribute("aria-label", "Abrir menu");
 
-            if (iconeMenuPrincipal) {
-                iconeMenuPrincipal.textContent = "☰";
+        if (iconeMenuPrincipal) {
+            iconeMenuPrincipal.textContent = "☰";
+        }
+
+        const destino = link.getAttribute("href");
+
+        if (destino && destino.startsWith("#")) {
+            const secao = document.querySelector(destino);
+
+            if (secao) {
+                const botaoRecolhivel =
+                    secao.querySelector(".titulo-recolhivel");
+
+                if (botaoRecolhivel) {
+                    const idConteudo =
+                        botaoRecolhivel.getAttribute("aria-controls");
+
+                    const conteudo =
+                        document.getElementById(idConteudo);
+
+                    if (conteudo) {
+                        botaoRecolhivel.setAttribute(
+                            "aria-expanded",
+                            "true"
+                        );
+
+                        conteudo.hidden = false;
+
+                        const sinal =
+                            botaoRecolhivel.querySelector(
+                                ".sinal-recolher"
+                            );
+
+                        if (sinal) {
+                            sinal.textContent = "−";
+                        }
+                    }
+                }
             }
-        });
+        }
     });
+});
+
 }
 
 /* ABRIR E FECHAR A HISTÓRIA */
