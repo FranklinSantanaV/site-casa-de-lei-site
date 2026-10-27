@@ -49,32 +49,48 @@
 
 </section>
     
-<section id="area-membros">
-  <h2>Área dos Membros</h2>
-  <p>Acesso restrito aos membros autorizados da Casa de Lei.</p>
 
-  <form id="form-login-membros">
-    <label for="email-membro">E-mail</label>
-    <input
-      type="email"
-      id="email-membro"
-      autocomplete="username"
-      required
-    >
+<section id="area-membros" class="secao-recolhivel">
+    <button
+        type="button"
+        class="titulo-recolhivel"
+        aria-expanded="false"
+        aria-controls="conteudo-area-membros">
 
-    <label for="senha-membro">Senha</label>
-    <input
-      type="password"
-      id="senha-membro"
-      autocomplete="current-password"
-      required
-    >
+        <span>
+            <span class="subtitulo">ACESSO RESTRITO</span>
+            <span class="texto-titulo">Área de Membros</span>
+        </span>
 
-    <button type="submit">Entrar</button>
-    <p id="mensagem-login" role="status"></p>
- 
-      </form>
+        <span class="sinal-recolher" aria-hidden="true">＋</span>
+    </button>
+
+    <div id="conteudo-area-membros" class="conteudo-recolhivel" hidden>
+        <p>Acesso restrito aos membros autorizados da Casa de Lei.</p>
+
+        <form id="form-login-membros">
+            <label for="email-membro">E-mail</label>
+            <input
+                type="email"
+                id="email-membro"
+                autocomplete="username"
+                required
+            >
+
+            <label for="senha-membro">Senha</label>
+            <input
+                type="password"
+                id="senha-membro"
+                autocomplete="current-password"
+                required
+            >
+
+            <button type="submit">Entrar</button>
+            <p id="mensagem-login" role="status"></p>
+        </form>
+    </div>
 </section>
+
 
 <!-- PAINEL ADMINISTRATIVO -->
 
