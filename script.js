@@ -627,27 +627,41 @@ if (botaoSairAdministracao) {
     });
 }
 
-/* MANTER O PAINEL OCULTO AO ABRIR A PÁGINA */
 
-mostrarPainelAdministrativo(false);
+/* RESTAURAR A SESSÃO AO ATUALIZAR A PÁGINA */
 
-/* ABRIR E FECHAR O REGISTRO DA ASSISTÊNCIA */
-(function () {
-    const botaoAbrir = document.getElementById("abrir-registro-assistencia");
-    const formulario = document.getElementById("formulario-registro-assistencia");
+async function restaurarSessaoAdministrativa() {
+    mostrarPainelAdministrativo(false);
 
-    if (!botaoAbrir || !formulario) {
-        console.error("Registro da Assistência: botão ou formulário não encontrado.");
+    const { data, error } =
+        await supabaseClient.auth.getSession();
+
+    if (error || !data.session) {
         return;
     }
 
-    botaoAbrir.addEventListener("click", function () {
-        const vaiAbrir = formulario.hidden;
+    const acesso = await verificarAcessoMateriais();
 
-        formulario.hidden = !vaiAbrir;
-        botaoAbrir.setAttribute("aria-expanded", String(vaiAbrir));
-        botaoAbrir.textContent = vaiAbrir
-            ? "− Fechar registro da assistência"
-            : "＋ Abrir registro da assistência";
-    });
-})();
+    if (!acesso) {
+        await supabaseClient.auth.signOut();
+
+        if (mensagemLogin) {
+            mensagemLogin.textContent =
+                "Sua sessão não tem autorização para acessar o painel.";
+        }
+
+        return;
+    }
+
+    mostrarPainelAdministrativo(true);
+
+    if (mensagemLogin) {
+        mensagemLogin.textContent =
+            "Você continua conectado à Área de Membros da Casa de Lei.";
+    }
+
+    await atualizarListaMateriais();
+}
+
+restaurarSessaoAdministrativa();
+
