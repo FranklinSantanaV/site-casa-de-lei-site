@@ -630,3 +630,23 @@ if (botaoSairAdministracao) {
 /* MANTER O PAINEL OCULTO AO ABRIR A PÁGINA */
 
 mostrarPainelAdministrativo(false);
+
+/* ABRIR E FECHAR O REGISTRO DA ASSISTÊNCIA */
+document.addEventListener("DOMContentLoaded", function () {
+    const botaoAbrir = document.getElementById("abrir-registro-assistencia");
+    const formulario = document.getElementById("formulario-registro-assistencia");
+
+    if (!botaoAbrir || !formulario) {
+        return;
+    }
+
+    botaoAbrir.addEventListener("click", function () {
+        const estaOculto = formulario.hidden;
+
+        formulario.hidden = !estaOculto;
+
+        botaoAbrir.textContent = estaOculto
+            ? "− Fechar registro da assistência"
+            : "＋ Abrir registro da assistência";
+    });
+});
