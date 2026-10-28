@@ -1,5 +1,147 @@
+/* ============================================================
+   1. REGISTRO E CONSULTA DA ASSISTÊNCIA (SUPABASE)
+   ============================================================ */
 
-/* AGENDAMENTO DE JOGO DE BÚZIOS E PIX */
+const btnCadastrarAssistencia = document.querySelector("#cadastrar-assistencia");
+const msgAssistencia = document.querySelector("#mensagem-assistencia");
+
+if (btnCadastrarAssistencia) {
+    btnCadastrarAssistencia.addEventListener("click", async () => {
+        const gira = document.querySelector("#assistencia-gira").value;
+        const responsavel = document.querySelector("#assistencia-responsavel").value.trim();
+        const nome = document.querySelector("#assistencia-nome").value.trim();
+        const email = document.querySelector("#assistencia-email").value.trim();
+        const telefone = document.querySelector("#assistencia-telefone").value.trim();
+        const endereco = document.querySelector("#assistencia-endereco").value.trim();
+        const frequentou = document.querySelector("#assistencia-frequentou").value;
+        const grupo = document.querySelector("#assistencia-grupo").value;
+        const observacao = document.querySelector("#assistencia-observacao").value.trim();
+        const soubeOutroTexto = document.querySelector("#assistencia-soube-outro").value.trim();
+
+        // Capturar checkboxes de "Como soube" (Múltipla escolha)
+        const checkboxesSoube = document.querySelectorAll('input[name="como_soube"]:checked');
+        let comoSoubeArr = Array.from(checkboxesSoube).map(cb => cb.value);
+        if (soubeOutroTexto) {
+            comoSoubeArr.push("Detalhe: " + soubeOutroTexto);
+        }
+        const comoSoubeStr = comoSoubeArr.join(", ");
+
+        // Capturar checkboxes de "Motivos" (Múltipla escolha)
+        const checkboxesMotivos = document.querySelectorAll('input[name="motivo"]:checked');
+        let motivosArr = Array.from(checkboxesMotivos).map(cb => cb.value);
+        const motivosStr = motivosArr.join(", ");
+
+        if (!nome) {
+            msgAssistencia.textContent = "Por favor, preencha ao menos o nome completo.";
+            msgAssistencia.style.color = "red";
+            return;
+        }
+
+        msgAssistencia.textContent = "Salvando registro...";
+        msgAssistencia.style.color = "#174c70";
+
+        // Enviar para a tabela 'registro_assistencia' no Supabase
+        const { data, error } = await supabaseClient
+            .from("registro_assistencia")
+            .insert([
+                {
+                    gira: gira,
+                    responsavel: responsavel,
+                    nome: nome,
+                    email: email,
+                    telefone: telefone,
+                    endereco: endereco,
+                    como_soube: comoSoubeStr,
+                    frequentou_terreiro: frequentou,
+                    participar_grupo: grupo,
+                    motivos: motivosStr,
+                    observacao: observacao
+                }
+            ]);
+
+        if (error) {
+            msgAssistencia.textContent = "Erro ao salvar: " + error.message;
+            msgAssistencia.style.color = "red";
+        } else {
+            msgAssistencia.textContent = "Ficha cadastrada com sucesso!";
+            msgAssistencia.style.color = "green";
+
+            // Limpar formulário
+            document.querySelector("#assistencia-gira").value = "";
+            document.querySelector("#assistencia-responsavel").value = "";
+            document.querySelector("#assistencia-nome").value = "";
+            document.querySelector("#assistencia-email").value = "";
+            document.querySelector("#assistencia-telefone").value = "";
+            document.querySelector("#assistencia-endereco").value = "";
+            document.querySelector("#assistencia-soube-outro").value = "";
+            document.querySelector("#assistencia-frequentou").value = "";
+            document.querySelector("#assistencia-grupo").value = "";
+            document.querySelector("#assistencia-observacao").value = "";
+
+            document.querySelectorAll('input[name="como_soube"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('input[name="motivo"]').forEach(cb => cb.checked = false);
+
+            // Atualizar lista de cadastrados
+            carregarAssistencia();
+        }
+    });
+}
+
+// Função para buscar e exibir a lista de assistidos
+async function carregarAssistencia() {
+    const containerLista = document.querySelector("#lista-assistencia");
+    if (!containerLista) return;
+
+    containerLista.innerHTML = "<p>Carregando registros...</p>";
+
+    const { data, error } = await supabaseClient
+        .from("registro_assistencia")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        containerLista.innerHTML = "<p>Erro ao carregar lista.</p>";
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        containerLista.innerHTML = "<p>Nenhum registro encontrado.</p>";
+        return;
+    }
+
+    let html = '<div style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">';
+
+    data.forEach(item => {
+        const dataCadastro = new Date(item.created_at).toLocaleDateString("pt-BR");
+        html += `
+            <div style="padding: 16px; border: 1px solid #e2d5b5; border-radius: 8px; background: #f8f6f0;">
+                <h4 style="color: #174c70; margin-bottom: 6px;">${item.nome}</h4>
+                <p style="margin: 2px 0; font-size: 0.9rem;"><strong>Gira:</strong> ${item.gira || 'Não informada'}</p>
+                <p style="margin: 2px 0; font-size: 0.9rem;"><strong>Recepção por:</strong> ${item.responsavel || 'Não informado'}</p>
+                <p style="margin: 2px 0; font-size: 0.9rem;"><strong>Contato:</strong> ${item.telefone || '-'} | ${item.email || '-'}</p>
+                <p style="margin: 2px 0; font-size: 0.9rem;"><strong>Endereço:</strong> ${item.endereco || 'Não informado'}</p>
+                <p style="margin: 2px 0; font-size: 0.9rem;"><strong>Como soube:</strong> ${item.como_soube || '-'}</p>
+                <p style="margin: 2px 0; font-size: 0.9rem;"><strong>Frequenta terreiro?</strong> ${item.frequentou_terreiro || '-'} | <strong>Quer grupo?</strong> ${item.participar_grupo || '-'}</p>
+                <p style="margin: 2px 0; font-size: 0.9rem;"><strong>Motivos:</strong> ${item.motivos || '-'}</p>
+                ${item.observacao ? `<p style="margin: 2px 0; font-size: 0.9rem;"><strong>Obs:</strong> ${item.observacao}</p>` : ''}
+                <small style="color: #888; display: block; margin-top: 6px;">Data do cadastro: ${dataCadastro}</small>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    containerLista.innerHTML = html;
+}
+
+const btnAtualizarAssistencia = document.querySelector("#atualizar-assistencia");
+if (btnAtualizarAssistencia) {
+    btnAtualizarAssistencia.addEventListener("click", carregarAssistencia);
+}
+
+
+/* ============================================================
+   2. AGENDAMENTO DE JOGO DE BÚZIOS E PIX
+   ============================================================ */
 
 const formularioJogo = document.querySelector(".agenda-formulario");
 
@@ -11,91 +153,93 @@ if (formularioJogo) {
     const chavePix = "11958483252";
     const numeroCasa = "5511986005002";
 
-    
+    if (botaoPix) {
+        botaoPix.addEventListener("click", async function () {
+            let copiou = false;
 
-botaoPix.addEventListener("click", async function () {
-    let copiou = false;
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(chavePix);
+                    copiou = true;
+                }
+            } catch (erro) {
+                copiou = false;
+            }
 
-    try {
-        if (navigator.clipboard && window.isSecureContext) {
-            await navigator.clipboard.writeText(chavePix);
-            copiou = true;
-        }
-    } catch (erro) {
-        copiou = false;
+            if (!copiou) {
+                const campoTemporario = document.createElement("textarea");
+                campoTemporario.value = chavePix;
+                campoTemporario.style.position = "fixed";
+                campoTemporario.style.left = "-9999px";
+
+                document.body.appendChild(campoTemporario);
+                campoTemporario.select();
+
+                try {
+                    copiou = document.execCommand("copy");
+                } catch (erro) {
+                    copiou = false;
+                }
+
+                campoTemporario.remove();
+            }
+
+            if (copiou) {
+                campoMensagem.textContent =
+                    "Chave Pix copiada! Abra o aplicativo do seu banco para pagar R$ 100,00.";
+            } else {
+                campoMensagem.textContent =
+                    "Não foi possível copiar automaticamente. Selecione e copie a chave Pix: " + chavePix;
+            }
+        });
     }
 
-    if (!copiou) {
-        const campoTemporario = document.createElement("textarea");
-        campoTemporario.value = chavePix;
-        campoTemporario.style.position = "fixed";
-        campoTemporario.style.left = "-9999px";
+    if (botaoComprovante) {
+        botaoComprovante.addEventListener("click", function () {
+            const data = document.querySelector("#data-jogo").value;
+            const horario = document.querySelector("#horario-jogo").value;
+            const nome = document.querySelector("#nome-jogo").value.trim();
+            const whatsapp = document.querySelector("#whatsapp-jogo").value.trim();
 
-        document.body.appendChild(campoTemporario);
-        campoTemporario.select();
+            if (!data || !horario || !nome || !whatsapp) {
+                alert("Preencha todos os campos antes de continuar.");
+                return;
+            }
 
-        try {
-            copiou = document.execCommand("copy");
-        } catch (erro) {
-            copiou = false;
-        }
+            const dataEscolhida = new Date(data + "T12:00:00");
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
 
-        campoTemporario.remove();
+            if (dataEscolhida < hoje) {
+                alert("Escolha uma data de hoje em diante.");
+                return;
+            }
+
+            const dataFormatada = data.split("-").reverse().join("/");
+
+            const mensagem =
+                "Olá! Quero solicitar um agendamento para Jogo de Búzios.\n\n" +
+                "Nome: " + nome + "\n" +
+                "Meu WhatsApp: " + whatsapp + "\n" +
+                "Data desejada: " + dataFormatada + "\n" +
+                "Horário desejado: " + horario + "\n" +
+                "Atendimento presencial\n" +
+                "Valor: R$ 100,00\n" +
+                "Pix utilizado: " + chavePix + "\n\n" +
+                "Realizei o pagamento e vou enviar o comprovante nesta conversa. Por favor, confirmem o recebimento e a disponibilidade do horário.";
+
+            const link = "https://wa.me/" + numeroCasa +
+                "?text=" + encodeURIComponent(mensagem);
+
+            window.open(link, "_blank");
+        });
     }
-
-    if (copiou) {
-        campoMensagem.textContent =
-            "Chave Pix copiada! Abra o aplicativo do seu banco para pagar R$ 100,00.";
-    } else {
-        campoMensagem.textContent =
-            "Não foi possível copiar automaticamente. Selecione e copie a chave Pix: " + chavePix;
-    }
-});
-
-
-
-    botaoComprovante.addEventListener("click", function () {
-        const data = document.querySelector("#data-jogo").value;
-        const horario = document.querySelector("#horario-jogo").value;
-        const nome = document.querySelector("#nome-jogo").value.trim();
-        const whatsapp = document.querySelector("#whatsapp-jogo").value.trim();
-
-        if (!data || !horario || !nome || !whatsapp) {
-            alert("Preencha todos os campos antes de continuar.");
-            return;
-        }
-
-        const dataEscolhida = new Date(data + "T12:00:00");
-        const hoje = new Date();
-        hoje.setHours(0, 0, 0, 0);
-
-        if (dataEscolhida < hoje) {
-            alert("Escolha uma data de hoje em diante.");
-            return;
-        }
-
-        const dataFormatada = data.split("-").reverse().join("/");
-
-        const mensagem =
-            "Olá! Quero solicitar um agendamento para Jogo de Búzios.\n\n" +
-            "Nome: " + nome + "\n" +
-            "Meu WhatsApp: " + whatsapp + "\n" +
-            "Data desejada: " + dataFormatada + "\n" +
-            "Horário desejado: " + horario + "\n" +
-            "Atendimento presencial\n" +
-            "Valor: R$ 100,00\n" +
-            "Pix utilizado: " + chavePix + "\n\n" +
-            "Realizei o pagamento e vou enviar o comprovante nesta conversa. Por favor, confirmem o recebimento e a disponibilidade do horário.";
-
-        const link = "https://wa.me/" + numeroCasa +
-            "?text=" + encodeURIComponent(mensagem);
-
-        window.open(link, "_blank");
-    });
 }
 
 
-/* ABRIR E FECHAR OS ÁLBUNS DA GALERIA */
+/* ============================================================
+   3. ABRIR E FECHAR OS ÁLBUNS DA GALERIA
+   ============================================================ */
 
 document.querySelectorAll(".titulo-album").forEach(function (botao) {
     botao.addEventListener("click", function () {
@@ -112,7 +256,10 @@ document.querySelectorAll(".titulo-album").forEach(function (botao) {
     });
 });
 
-/* ABRIR E FECHAR O MENU PRINCIPAL */
+
+/* ============================================================
+   4. ABRIR E FECHAR O MENU PRINCIPAL
+   ============================================================ */
 
 const botaoMenu = document.querySelector("#botao-menu");
 const menuPrincipal = document.querySelector("#menu-principal");
@@ -135,75 +282,83 @@ if (botaoMenu && menuPrincipal) {
         }
     });
 
-  
-menuPrincipal.querySelectorAll("a").forEach(function (link) {
-    link.addEventListener("click", function () {
-        menuPrincipal.classList.add("menu-fechado");
-        botaoMenu.setAttribute("aria-expanded", "false");
-        botaoMenu.setAttribute("aria-label", "Abrir menu");
+    menuPrincipal.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", function () {
+            menuPrincipal.classList.add("menu-fechado");
+            botaoMenu.setAttribute("aria-expanded", "false");
+            botaoMenu.setAttribute("aria-label", "Abrir menu");
 
-        if (iconeMenuPrincipal) {
-            iconeMenuPrincipal.textContent = "☰";
-        }
+            if (iconeMenuPrincipal) {
+                iconeMenuPrincipal.textContent = "☰";
+            }
 
-        const destino = link.getAttribute("href");
+            const destino = link.getAttribute("href");
 
-        if (destino && destino.startsWith("#")) {
-            const secao = document.querySelector(destino);
+            if (destino && destino.startsWith("#")) {
+                const secao = document.querySelector(destino);
 
-            if (secao) {
-                const botaoRecolhivel =
-                    secao.querySelector(".titulo-recolhivel");
+                if (secao) {
+                    const botaoRecolhivel =
+                        secao.querySelector(".titulo-recolhivel");
 
-                if (botaoRecolhivel) {
-                    const idConteudo =
-                        botaoRecolhivel.getAttribute("aria-controls");
+                    if (botaoRecolhivel) {
+                        const idConteudo =
+                            botaoRecolhivel.getAttribute("aria-controls");
 
-                    const conteudo =
-                        document.getElementById(idConteudo);
+                        const conteudo =
+                            document.getElementById(idConteudo);
 
-                    if (conteudo) {
-                        botaoRecolhivel.setAttribute(
-                            "aria-expanded",
-                            "true"
-                        );
-
-                        conteudo.hidden = false;
-
-                        const sinal =
-                            botaoRecolhivel.querySelector(
-                                ".sinal-recolher"
+                        if (conteudo) {
+                            botaoRecolhivel.setAttribute(
+                                "aria-expanded",
+                                "true"
                             );
 
-                        if (sinal) {
-                            sinal.textContent = "−";
+                            conteudo.hidden = false;
+
+                            const sinal =
+                                botaoRecolhivel.querySelector(
+                                    ".sinal-recolher"
+                                );
+
+                            if (sinal) {
+                                sinal.textContent = "−";
+                            }
                         }
                     }
                 }
             }
-        }
+        });
     });
-});
-
 }
 
-/* ABRIR E FECHAR A HISTÓRIA */
+
+/* ============================================================
+   5. ABRIR E FECHAR SEÇÕES RECOLHÍVEIS
+   ============================================================ */
 
 document.querySelectorAll(".titulo-recolhivel").forEach(function (botao) {
     botao.addEventListener("click", function () {
         const idConteudo = botao.getAttribute("aria-controls");
         const conteudo = document.getElementById(idConteudo);
+        if (!conteudo) return;
+
         const aberto = botao.getAttribute("aria-expanded") === "true";
 
         botao.setAttribute("aria-expanded", String(!aberto));
         conteudo.hidden = aberto;
 
         const sinal = botao.querySelector(".sinal-recolher");
-        sinal.textContent = aberto ? "＋" : "−";
+        if (sinal) {
+            sinal.textContent = aberto ? "＋" : "−";
+        }
     });
 });
 
-/* ===== CONTROLE DE MATERIAIS E LOGIN ===== */
+
+/* ============================================================
+   6. CONTROLE DE MATERIAIS E LOGIN
+   ============================================================ */
 
 async function verificarAcessoMateriais() {
     const { data: { user }, error } =
@@ -227,8 +382,6 @@ async function verificarAcessoMateriais() {
     return { user, perfil };
 }
 
-/* LISTAR MATERIAIS */
-
 async function listarMateriaisCasa() {
     const { data, error } = await supabaseClient
         .from("materiais_casa")
@@ -242,8 +395,6 @@ async function listarMateriaisCasa() {
 
     return data;
 }
-
-/* ELEMENTOS DO PAINEL */
 
 const formularioLoginMembros =
     document.getElementById("form-login-membros");
@@ -260,16 +411,11 @@ const mensagemMateriais =
 const listaMateriais =
     document.getElementById("lista-materiais");
 
-/* MOSTRAR OU OCULTAR O PAINEL */
-
 function mostrarPainelAdministrativo(mostrar) {
     if (painelAdministrativo) {
         painelAdministrativo.hidden = !mostrar;
     }
 }
-
-/* EXIBIR A LISTA DE MATERIAIS */
-
 
 async function atualizarListaMateriais() {
     if (!listaMateriais || !mensagemMateriais) return;
@@ -405,7 +551,6 @@ async function atualizarListaMateriais() {
         listaMateriais.appendChild(itemLista);
     });
 }
-/* LOGIN DA ÁREA DE MEMBROS */
 
 if (formularioLoginMembros) {
     formularioLoginMembros.addEventListener(
@@ -453,16 +598,15 @@ if (formularioLoginMembros) {
                 return;
             }
 
-          mensagemLogin.textContent =
-    "Login realizado! Bem-vindo à Área de Membros da Casa de Lei.";
+            mensagemLogin.textContent =
+                "Login realizado! Bem-vindo à Área de Membros da Casa de Lei.";
 
-mostrarPainelAdministrativo(true);
-await atualizarListaMateriais();
+            mostrarPainelAdministrativo(true);
+            await atualizarListaMateriais();
+            carregarAssistencia(); // Carrega também a lista da assistência ao logar
         }
     );
 }
-
-/* CADASTRAR MATERIAL */
 
 let materialEmEdicao = null;
 
@@ -505,14 +649,13 @@ if (botaoCadastrarMaterial) {
 
         const resultadoAcesso = await verificarAcessoMateriais();
 
-       if (!resultadoAcesso) {
-    mensagemMateriais.textContent =
-        "Você precisa entrar com uma conta de membro aprovada.";
-    mostrarPainelAdministrativo(false);
-    return;
-}
+        if (!resultadoAcesso) {
+            mensagemMateriais.textContent =
+                "Você precisa entrar com uma conta de membro aprovada.";
+            mostrarPainelAdministrativo(false);
+            return;
+        }
 
-       
         let resultadoGravacao;
 
         try {
@@ -571,11 +714,8 @@ if (botaoCadastrarMaterial) {
             "Material salvo com sucesso!";
 
         await atualizarListaMateriais();
-
     });
 }
-
-/* ATUALIZAR A LISTA */
 
 const botaoAtualizarMateriais =
     document.getElementById("atualizar-materiais");
@@ -585,8 +725,6 @@ if (botaoAtualizarMateriais) {
         await atualizarListaMateriais();
     });
 }
-
-/* SAIR DA CONTA */
 
 const botaoSairAdministracao =
     document.getElementById("sair-administracao");
@@ -626,7 +764,5 @@ if (botaoSairAdministracao) {
         }
     });
 }
-
-/* MANTER O PAINEL OCULTO AO ABRIR A PÁGINA */
 
 mostrarPainelAdministrativo(false);
