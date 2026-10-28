@@ -632,21 +632,22 @@ if (botaoSairAdministracao) {
 mostrarPainelAdministrativo(false);
 
 /* ABRIR E FECHAR O REGISTRO DA ASSISTÊNCIA */
-document.addEventListener("DOMContentLoaded", function () {
+(function () {
     const botaoAbrir = document.getElementById("abrir-registro-assistencia");
     const formulario = document.getElementById("formulario-registro-assistencia");
 
     if (!botaoAbrir || !formulario) {
+        console.error("Registro da Assistência: botão ou formulário não encontrado.");
         return;
     }
 
     botaoAbrir.addEventListener("click", function () {
-        const estaOculto = formulario.hidden;
+        const vaiAbrir = formulario.hidden;
 
-        formulario.hidden = !estaOculto;
-
-        botaoAbrir.textContent = estaOculto
+        formulario.hidden = !vaiAbrir;
+        botaoAbrir.setAttribute("aria-expanded", String(vaiAbrir));
+        botaoAbrir.textContent = vaiAbrir
             ? "− Fechar registro da assistência"
             : "＋ Abrir registro da assistência";
     });
-});
+})();
