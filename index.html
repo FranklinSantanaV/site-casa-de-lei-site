@@ -96,9 +96,139 @@
         <div class="admin-cabecalho">
             <span class="admin-etiqueta">CASA DE LEI</span>
             <h2>Painel Administrativo</h2>
-            <p>Gerencie os materiais e acompanhe as necessidades da casa.</p>
+            <p>Gerencie os registros da assistência e os materiais da casa.</p>
         </div>
 
+        <!-- NOVO CARTÃO: REGISTRO DA ASSISTÊNCIA -->
+        <div class="admin-cartao">
+            <div class="admin-titulo-secao">
+                <span class="admin-icone">👤</span>
+                <div>
+                    <h3>Registrar Pessoas da Assistência</h3>
+                    <p>Preencha a ficha de acolhimento do visitante.</p>
+                </div>
+            </div>
+
+            <div class="admin-formulario">
+                <div class="admin-campo">
+                    <label for="assistencia-gira">Qual gira a pessoa veio?</label>
+                    <select id="assistencia-gira">
+                        <option value="">Selecione a gira</option>
+                        <option value="Gira de Caboclo">Gira de Caboclo</option>
+                        <option value="Gira de Preto-Velho">Gira de Preto-Velho</option>
+                        <option value="Gira de Baiano">Gira de Baiano</option>
+                        <option value="Gira de Boiadeiro">Gira de Boiadeiro</option>
+                        <option value="Gira de Erê">Gira de Erê</option>
+                        <option value="Gira de Esquerda (Exu/Pombagira)">Gira de Esquerda (Exu/Pombagira)</option>
+                        <option value="Outra">Outra</option>
+                    </select>
+                </div>
+
+                <div class="admin-campo">
+                    <label for="assistencia-responsavel">Responsável pela recepção</label>
+                    <input type="text" id="assistencia-responsavel" placeholder="Nome de quem acolheu">
+                </div>
+
+                <div class="admin-campo">
+                    <label for="assistencia-nome">Nome completo</label>
+                    <input type="text" id="assistencia-nome" placeholder="Digite o nome completo">
+                </div>
+
+                <div class="admin-campo">
+                    <label for="assistencia-email">E-mail</label>
+                    <input type="email" id="assistencia-email" placeholder="email@exemplo.com">
+                </div>
+
+                <div class="admin-campo">
+                    <label for="assistencia-telefone">Telefone / WhatsApp</label>
+                    <input type="tel" id="assistencia-telefone" placeholder="(11) 99999-9999">
+                </div>
+
+                <div class="admin-campo admin-campo-completo">
+                    <label for="assistencia-endereco">Endereço completo</label>
+                    <input type="text" id="assistencia-endereco" placeholder="Rua, número, bairro, cidade...">
+                </div>
+
+                <!-- COMO SOUBE DA CASA (Múltipla escolha) -->
+                <div class="admin-campo admin-campo-completo">
+                    <label>Soube da casa por quem ou por onde? (Pode marcar mais de uma)</label>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 8px;">
+                        <label style="font-weight: normal;"><input type="checkbox" name="como_soube" value="Google"> Google</label>
+                        <label style="font-weight: normal;"><input type="checkbox" name="como_soube" value="Instagram"> Instagram</label>
+                        <label style="font-weight: normal;"><input type="checkbox" name="como_soube" value="Facebook"> Facebook</label>
+                        <label style="font-weight: normal;"><input type="checkbox" name="como_soube" value="Indicação de Nome"> Indicação de Pessoa</label>
+                        <label style="font-weight: normal;"><input type="checkbox" name="como_soube" value="Outros"> Outros</label>
+                    </div>
+                    <input type="text" id="assistencia-soube-outro" placeholder="Se indicou nome ou outro, especifique aqui" style="margin-top: 8px;">
+                </div>
+
+                <div class="admin-campo">
+                    <label for="assistencia-frequentou">Já frequenta ou frequentou terreiro?</label>
+                    <select id="assistencia-frequentou">
+                        <option value="">Selecione</option>
+                        <option value="Sim">Sim</option>
+                        <option value="Não">Não</option>
+                    </select>
+                </div>
+
+                <div class="admin-campo">
+                    <label for="assistencia-grupo">Gostaria de participar do grupo da assistência?</label>
+                    <select id="assistencia-grupo">
+                        <option value="">Selecione</option>
+                        <option value="Sim">Sim</option>
+                        <option value="Não">Não</option>
+                    </select>
+                </div>
+
+                <!-- MOTIVO DA VISITA (Múltipla escolha) -->
+                <div class="admin-campo admin-campo-completo">
+                    <label>Motivo da visita (Pode selecionar mais de uma opção)</label>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 8px;">
+                        <label style="font-weight: normal;"><input type="checkbox" name="motivo" value="Saúde"> Saúde</label>
+                        <label style="font-weight: normal;"><input type="checkbox" name="motivo" value="Amor"> Amor</label>
+                        <label style="font-weight: normal;"><input type="checkbox" name="motivo" value="Financeiro"> Financeiro</label>
+                        <label style="font-weight: normal;"><input type="checkbox" name="motivo" value="Emprego"> Emprego</label>
+                        <label style="font-weight: normal;"><input type="checkbox" name="motivo" value="Pessoal"> Pessoal</label>
+                        <label style="font-weight: normal;"><input type="checkbox" name="motivo" value="Curiosidade"> Curiosidade</label>
+                        <label style="font-weight: normal;"><input type="checkbox" name="motivo" value="Espiritual"> Espiritual</label>
+                    </div>
+                </div>
+
+                <div class="admin-campo admin-campo-completo">
+                    <label for="assistencia-observacao">Observações gerais</label>
+                    <textarea id="assistencia-observacao" placeholder="Anotações adicionais sobre o atendimento..."></textarea>
+                </div>
+            </div>
+
+            <button type="button" id="cadastrar-assistencia" class="admin-botao admin-botao-principal">
+                Salvar Ficha da Assistência
+            </button>
+
+            <p id="mensagem-assistencia" role="status"></p>
+        </div>
+
+        <!-- CARTÃO: LISTA DA ASSISTÊNCIA -->
+        <div class="admin-cartao admin-cartao-lista">
+            <div class="admin-lista-cabecalho">
+                <div class="admin-titulo-secao">
+                    <span class="admin-icone">📋</span>
+                    <div>
+                        <h3>Pessoas Cadastradas na Assistência</h3>
+                        <p>Consulte a lista de assistidos cadastrados.</p>
+                    </div>
+                </div>
+
+                <button type="button" id="atualizar-assistencia" class="admin-botao admin-botao-secundario">
+                    ↻ Atualizar lista
+                </button>
+            </div>
+
+            <div id="lista-assistencia"></div>
+        </div>
+
+        <hr style="margin: 30px 0; border: 0; border-top: 1px solid #e2d5b5;">
+
+        <!-- CARTÃO: CADASTRAR MATERIAL -->
         <div class="admin-cartao">
             <div class="admin-titulo-secao">
                 <span class="admin-icone">＋</span>
@@ -145,6 +275,7 @@
             <p id="mensagem-materiais" role="status"></p>
         </div>
 
+        <!-- CARTÃO: LISTA DE MATERIAIS -->
         <div class="admin-cartao admin-cartao-lista">
             <div class="admin-lista-cabecalho">
                 <div class="admin-titulo-secao">
@@ -397,533 +528,4 @@
             <span class="sinal-recolher" aria-hidden="true">＋</span>
         </button>
 
-        <div id="conteudo-umbanda" class="conteudo-recolhivel" hidden>
-            <p>
-                A Umbanda é uma religião brasileira que reúne diferentes
-                tradições e expressões de espiritualidade, tendo como pilares
-                a fé, a caridade, o amor, a humildade e o respeito por todos
-                os seres.
-            </p>
-
-            <p>
-                Na Umbanda, buscamos o crescimento espiritual por meio da
-                prática do bem, da orientação dos guias espirituais e do
-                aprendizado que cada encontro nos proporciona. Caboclos,
-                Pretos-Velhos, Crianças, Exus, Pombagiras e outras entidades,
-                conforme os fundamentos de cada casa, são respeitados por
-                seus ensinamentos e pelo trabalho espiritual que realizam.
-            </p>
-
-            <p>
-                Os Orixás representam forças sagradas da natureza e são
-                reverenciados como divindades, de acordo com a tradição
-                religiosa. Por meio dessa relação de fé, aprendemos sobre
-                equilíbrio, coragem, sabedoria, amor e respeito à vida.
-            </p>
-
-            <p>
-                Mais do que palavras, a Umbanda é vivência, compromisso e
-                transformação. Ela nos convida a olhar para nós mesmos,
-                praticar a caridade sem esperar recompensas, respeitar as
-                diferenças e compreender que cada pessoa tem sua própria
-                caminhada espiritual.
-            </p>
-
-            <p>
-                Na Casa de Lei Mãe Iemanjá e Pai Benedito das Almas,
-                cultivamos a fé, o acolhimento e o respeito aos ensinamentos
-                espirituais, mantendo viva a tradição e buscando oferecer
-                a cada pessoa um espaço de aprendizado, orientação e
-                fortalecimento da sua caminhada.
-            </p>
-
-            <p class="frase-umbanda">
-                “A caridade é um dos caminhos que fortalecem a fé,
-                elevam o espírito e nos ensinam a amar o próximo.”
-            </p>
-        </div>
-    </section>
-
-    <!-- CALENDÁRIO DE GIRAS E OBRIGAÇÕES -->
-    <section id="calendario" class="calendario-giras secao-recolhivel">
-        <button
-            type="button"
-            class="titulo-recolhivel"
-            aria-expanded="false"
-            aria-controls="conteudo-calendario">
-
-            <span>
-                <span class="subtitulo">PROGRAMAÇÃO DA NOSSA CASA</span>
-                <span class="texto-titulo">Calendário de Giras e Obrigações</span>
-            </span>
-
-            <span class="sinal-recolher" aria-hidden="true">＋</span>
-        </button>
-
-        <div id="conteudo-calendario" class="conteudo-recolhivel" hidden>
-            <p class="calendario-descricao">
-                Confira nossa programação religiosa. Que cada encontro seja
-                um momento de fé, união e fortalecimento espiritual.
-            </p>
-
-            <div class="calendario-meses">
-                <article class="mes-giras">
-                    <h3>Outubro de 2026</h3>
-
-                    <div class="evento-gira">
-                        <div class="data-gira">
-                            <strong>31</strong>
-                            <span>SÁB</span>
-                        </div>
-                        <div class="detalhes-gira">
-                            <h4>Gira de Esquerda</h4>
-                            <p>Portões abertos às 18h</p>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="mes-giras">
-                    <h3>Novembro de 2026</h3>
-
-                    <div class="evento-gira">
-                        <div class="data-gira">
-                            <strong>02</strong>
-                            <span>SEG</span>
-                        </div>
-                        <div class="detalhes-gira">
-                            <h4>Obrigação no Cemitério</h4>
-                            <p>Às 12h</p>
-                        </div>
-                    </div>
-
-                    <div class="evento-gira evento-aberto">
-                        <div class="data-gira">
-                            <strong>07</strong>
-                            <span>SÁB</span>
-                        </div>
-                        <div class="detalhes-gira">
-                            <h4>Programação em aberto</h4>
-                            <p>Gira a definir</p>
-                        </div>
-                    </div>
-
-                    <div class="evento-gira evento-aberto">
-                        <div class="data-gira">
-                            <strong>14</strong>
-                            <span>SÁB</span>
-                        </div>
-                        <div class="detalhes-gira">
-                            <h4>Programação em aberto</h4>
-                            <p>Gira a definir</p>
-                        </div>
-                    </div>
-
-                    <div class="evento-gira evento-aberto">
-                        <div class="data-gira">
-                            <strong>21</strong>
-                            <span>SÁB</span>
-                        </div>
-                        <div class="detalhes-gira">
-                            <h4>Programação em aberto</h4>
-                            <p>Gira a definir</p>
-                        </div>
-                    </div>
-
-                    <div class="evento-gira evento-aberto">
-                        <div class="data-gira">
-                            <strong>28</strong>
-                            <span>SÁB</span>
-                        </div>
-                        <div class="detalhes-gira">
-                            <h4>Programação em aberto</h4>
-                            <p>Gira a definir</p>
-                        </div>
-                    </div>
-                </article>
-            </div>
-        </div>
-    </section>
-
-    <!-- GALERIA -->
-    <section id="galeria" class="secao-galeria secao-recolhivel">
-        <button
-            type="button"
-            class="titulo-recolhivel"
-            aria-expanded="false"
-            aria-controls="conteudo-galeria">
-
-            <span>
-                <span class="subtitulo">MOMENTOS DA NOSSA CASA</span>
-                <span class="texto-titulo">Galeria de Fotos e Vídeos</span>
-            </span>
-
-            <span class="sinal-recolher" aria-hidden="true">＋</span>
-        </button>
-
-        <div id="conteudo-galeria" class="conteudo-recolhivel" hidden>
-            <p class="galeria-descricao">
-                Recordações de fé, união e celebração da nossa família espiritual.
-            </p>
-
-            <h3>🎉 Festa de Erê</h3>
-
-            <div class="galeria-fotos">
-                <img src="imagens/Festa Erê/Festa ere.jpeg" alt="Festa de Erê">
-                <img src="imagens/Festa Erê/Festa ere01.jpeg" alt="Festa de Erê">
-                <img src="imagens/Festa Erê/Festa ere02.jpeg" alt="Festa de Erê">
-                <img src="imagens/Festa Erê/Festa ere03.jpeg" alt="Festa de Erê">
-                <img src="imagens/Festa Erê/Festa ere04.jpeg" alt="Festa de Erê">
-                <img src="imagens/Festa Erê/Festa ere06.jpeg" alt="Festa de Erê">
-                <img src="imagens/Festa Erê/Festa ere07.jpeg" alt="Festa de Erê">
-                <img src="imagens/Festa Erê/Festa ere08.jpeg" alt="Festa de Erê">
-                <img src="imagens/Festa Erê/Festa ere10.jpeg" alt="Festa de Erê">
-            </div>
-
-            <div class="galeria-videos">
-                <video controls preload="metadata">
-                    <source src="imagens/Festa Erê/Festa ere05.mp4" type="video/mp4">
-                </video>
-
-                <video controls preload="metadata">
-                    <source src="imagens/Festa Erê/Festa ere09.mp4" type="video/mp4">
-                </video>
-            </div>
-
-            <h3>🔥 Festa de Tranca-Ruas</h3>
-
-            <div class="galeria-fotos">
-                <img src="imagens/Festa Tranca Ruas/Festa tranca ruas1.jpeg" alt="Festa de Tranca-Ruas">
-                <img src="imagens/Festa Tranca Ruas/Festa tranca ruas2.jpeg" alt="Festa de Tranca-Ruas">
-                <img src="imagens/Festa Tranca Ruas/Festa tranca ruas3.jpeg" alt="Festa de Tranca-Ruas">
-                <img src="imagens/Festa Tranca Ruas/Festa tranca ruas5.jpeg" alt="Festa de Tranca-Ruas">
-                <img src="imagens/Festa Tranca Ruas/Festa tranca ruas6.jpeg" alt="Festa de Tranca-Ruas">
-                <img src="imagens/Festa Tranca Ruas/Festa tranca ruas7.jpeg" alt="Festa de Tranca-Ruas">
-                <img src="imagens/Festa Tranca Ruas/Festa tranca ruas8.jpeg" alt="Festa de Tranca-Ruas">
-            </div>
-
-            <div class="galeria-videos">
-                <video controls preload="metadata">
-                    <source src="imagens/Festa Tranca Ruas/Festa tranca ruas.mp4" type="video/mp4">
-                </video>
-
-                <video controls preload="metadata">
-                    <source src="imagens/Festa Tranca Ruas/Festa tranca ruas4.mp4" type="video/mp4">
-                </video>
-            </div>
-        </div>
-    </section>
-
-    <!-- JOGO DE BÚZIOS -->
-    <section id="agenda" class="agenda-buzios secao-recolhivel">
-        <button
-            type="button"
-            class="titulo-recolhivel"
-            aria-expanded="false"
-            aria-controls="conteudo-agenda">
-
-            <span>
-                <span class="subtitulo">UM MOMENTO DE ORIENTAÇÃO ESPIRITUAL</span>
-                <span class="texto-titulo">Agende seu Jogo de Búzios</span>
-            </span>
-
-            <span class="sinal-recolher" aria-hidden="true">＋</span>
-        </button>
-
-        <div id="conteudo-agenda" class="conteudo-recolhivel" hidden>
-            <p class="agenda-descricao">
-                Reserve seu atendimento presencial com acolhimento,
-                respeito e orientação espiritual.
-            </p>
-
-            <div class="agenda-cartao">
-
-                <div class="agenda-informacao">
-                    <img
-                        src="imagens/brasao.png"
-                        alt=""
-                        class="brasao-agenda"
-                        aria-hidden="true"
-                    >
-
-                    <div class="conteudo-agenda-informacao">
-                        <span class="agenda-icone">✧</span>
-
-                        <h3>Atendimento presencial</h3>
-
-                        <p>Casa de Lei Mãe Iemanjá e Pai Benedito das Almas</p>
-
-                        <p><strong>Duração:</strong> 1 hora</p>
-
-                        <p><strong>Valor:</strong> R$ 100,00</p>
-                    </div>
-                </div>
-
-                <div class="agenda-formulario">
-                    <h3>Escolha seu horário</h3>
-
-                    <label for="data-jogo">Data desejada</label>
-                    <input type="date" id="data-jogo" required>
-
-                    <label for="horario-jogo">Horário desejado</label>
-                    <select id="horario-jogo" required>
-                        <option value="">Escolha o horário desejado</option>
-                        <option value="18:00">18h00</option>
-                        <option value="19:00">19h00</option>
-                        <option value="20:00">20h00</option>
-                        <option value="21:00">21h00</option>
-                    </select>
-
-                    <label for="nome-jogo">Nome completo</label>
-                    <input type="text" id="nome-jogo"
-                        placeholder="Digite seu nome" required>
-
-                    <label for="whatsapp-jogo">Seu WhatsApp</label>
-                    <input type="tel" id="whatsapp-jogo"
-                        placeholder="(11) 99999-9999" required>
-
-                    <div class="pagamento-pix">
-                        <h3>Pagamento via Pix</h3>
-                        <p><strong>Valor: R$ 100,00</strong></p>
-                        <p>Chave Pix (celular):</p>
-
-                        <p class="chave-pix">
-                            <strong>11958483252</strong>
-                        </p>
-
-                        <button type="button" id="copiar-pix"
-                            class="botao-agenda">
-                            Copiar chave Pix
-                        </button>
-
-                        <p>
-                            Após realizar o pagamento, clique no botão abaixo
-                            para abrir o WhatsApp e enviar o comprovante.
-                        </p>
-                    </div>
-
-                    <p class="aviso-agendamento">
-                        <strong>Importante sobre o agendamento</strong><br><br>
-                        O horário será confirmado após a conferência do
-                        pagamento recebido. O envio do comprovante, por si só,
-                        não garante a confirmação da reserva.
-
-                        <br><br>
-
-                        <strong>Cancelamento e não comparecimento:</strong>
-                        as condições de cancelamento, remarcação e eventual
-                        reembolso serão informadas antes da conclusão
-                        do agendamento.
-                    </p>
-
-                    <button type="button" id="enviar-comprovante"
-                        class="botao-agenda">
-                        Pagar e enviar comprovante pelo WhatsApp
-                    </button>
-
-                    <p id="mensagem-agenda" role="status"></p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- FAÇA SUA DOAÇÃO -->
-    <section id="doacao" class="secao-doacao secao-recolhivel">
-        <button
-            type="button"
-            class="titulo-recolhivel"
-            aria-expanded="false"
-            aria-controls="conteudo-doacao">
-
-            <span>
-                <span class="subtitulo">SOLIDARIEDADE, FÉ E CARIDADE</span>
-                <span class="texto-titulo">♡ Faça sua Doação</span>
-            </span>
-
-            <span class="sinal-recolher" aria-hidden="true">＋</span>
-        </button>
-
-        <div id="conteudo-doacao" class="conteudo-recolhivel" hidden>
-
-            <p class="doacao-introducao">
-                Sua contribuição ajuda a manter nossa casa, nossos trabalhos
-                religiosos e as ações de caridade. Toda ajuda é recebida com
-                muito carinho e gratidão.
-            </p>
-
-            <div class="doacao-opcoes">
-
-                <!-- DOAÇÃO DE MATERIAIS -->
-                <div class="doacao-cartao">
-                    <span class="doacao-icone" aria-hidden="true">✧</span>
-
-                    <h3>Doação de Materiais</h3>
-
-                    <p>
-                        Você pode colaborar com itens utilizados nos trabalhos
-                        religiosos da nossa casa, como:
-                    </p>
-
-                    <ul>
-                        <li>Velas</li>
-                        <li>Azeite de dendê</li>
-                        <li>Cigarros</li>
-                        <li>Champanhe e conhaque</li>
-                        <li>Marafo, pinga e outras bebidas utilizadas pela casa</li>
-                        <li>Outros materiais necessários aos nossos trabalhos</li>
-                    </ul>
-
-                    <p>
-                        Entre em contato para confirmar os itens de que precisamos
-                        e combinar a entrega.
-                    </p>
-
-                    <a
-                        class="botao-doacao"
-                        href="https://wa.me/5511986005002"
-                        target="_blank"
-                        rel="noopener noreferrer">
-                        Combinar uma doação
-                    </a>
-                </div>
-
-                <!-- DOAÇÃO VIA PIX -->
-                <div class="doacao-cartao doacao-pix">
-                    <span class="doacao-icone" aria-hidden="true">♡</span>
-
-                    <h3>Doação via Pix</h3>
-
-                    <p>
-                        Você também pode contribuir financeiramente com qualquer
-                        valor para ajudar nas necessidades da Casa de Lei.
-                    </p>
-
-                    <div class="pix-chave">
-                        <strong>Chave Pix — Telefone</strong>
-                        <span>+55 (11) 95848-3252</span>
-                    </div>
-
-                    <p>
-                        Estamos confirmando os dados da chave Pix para
-                        disponibilizá-la com segurança.
-                    </p>
-
-                    <a
-                        class="botao-doacao"
-                        href="https://wa.me/5511986005002"
-                        target="_blank"
-                        rel="noopener noreferrer">
-                        Tirar dúvidas pelo WhatsApp
-                    </a>
-                </div>
-
-            </div>
-
-            <p class="doacao-agradecimento">
-                Que Oxalá abençoe cada gesto de amor, fé e caridade.
-            </p>
-
-        </div>
-    </section>
-
-    <!-- CONTATO -->
-    <section id="contato" class="secao-contato">
-        <p class="subtitulo">ESTAMOS À DISPOSIÇÃO</p>
-
-        <h2>Entre em contato</h2>
-
-        <p>
-            Quer conhecer nossa casa ou saber mais sobre nossas atividades?
-            Será um prazer conversar com você.
-        </p>
-
-        <div class="endereco-casa">
-            <h3>Onde estamos</h3>
-
-            <p>
-                Rua Sebastião Batista, 70<br>
-                Cidade Tiradentes — São Paulo/SP<br>
-                CEP: 08470-330
-            </p>
-
-            <a
-                class="botao-contato"
-                href="https://www.google.com/maps/search/?api=1&query=Rua+Sebasti%C3%A3o+Batista%2C+70%2C+Cidade+Tiradentes%2C+S%C3%A3o+Paulo%2C+SP%2C+08470-330"
-                target="_blank"
-                rel="noopener noreferrer">
-                Como chegar
-            </a>
-
-            <a
-                class="botao-contato"
-                href="https://share.google/6bIe4OYxPZc1AQIvM"
-                target="_blank"
-                rel="noopener noreferrer">
-                Ver perfil no Google
-            </a>
-        </div>
-
-        <div class="mapa-casa">
-            <iframe
-                src="https://maps.google.com/maps?q=Rua%20Sebasti%C3%A3o%20Batista%2C%2070%2C%20Cidade%20Tiradentes%2C%20S%C3%A3o%20Paulo%2C%20SP%2C%2008470-330&z=16&output=embed"
-                width="100%"
-                height="350"
-                style="border: 0;"
-                loading="lazy"
-                allowfullscreen
-                title="Localização da Casa de Lei">
-            </iframe>
-        </div>
-
-        <div class="contatos-lista">
-
-            <div class="contato-item">
-                <h3>WhatsApp</h3>
-                <p>Fale diretamente conosco para tirar suas dúvidas.</p>
-                <a
-                    class="botao-contato"
-                    href="https://wa.me/5511986005002"
-                    target="_blank"
-                    rel="noopener noreferrer">
-                    Conversar pelo WhatsApp
-                </a>
-            </div>
-
-            <div class="contato-item">
-                <h3>Facebook</h3>
-                <p>Acompanhe nossas publicações e momentos da casa.</p>
-                <a
-                    class="botao-contato"
-                    href="https://www.facebook.com/share/1E5fMGiyqx/"
-                    target="_blank"
-                    rel="noopener noreferrer">
-                    Visitar Facebook
-                </a>
-            </div>
-
-            <div class="contato-item">
-                <h3>Instagram</h3>
-                <p>Veja nossas publicações, fotos e atividades.</p>
-                <a
-                    class="botao-contato"
-                    href="https://www.instagram.com/casadeleimaeyemanja_/"
-                    target="_blank"
-                    rel="noopener noreferrer">
-                    Visitar Instagram
-                </a>
-            </div>
-
-        </div>
-    </section>
-
-</main>
-
-<footer>
-    <p>Casa de Lei Mãe Iemanjá e Pai Benedito das Almas</p>
-    <p>Que a fé, a caridade e o amor guiem nossos caminhos.</p>
-</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js"></script>
-<script src="script.js"></script>
-</body>
-</html>
+        <div id="conteudo-umb
