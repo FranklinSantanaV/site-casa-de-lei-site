@@ -181,10 +181,23 @@
                 aria-controls="formulario-registro-assistencia">
                 ＋ Abrir registro da assistência
             </button>
+<div id="formulario-registro-assistencia" hidden>
+    <form id="form-registro-assistencia">
+        <div class="admin-formulario">
 
-            <div id="formulario-registro-assistencia" hidden>
-                <form id="form-registro-assistencia">
-                    <div class="admin-formulario">
+            <div class="admin-campo">
+                <label for="assistencia-data">Data da assistência</label>
+                <input
+                    id="assistencia-data"
+                    name="data-assistencia"
+                    type="date"
+                    required>
+            </div>
+
+            <div class="admin-campo">
+                <label for="assistencia-gira">Gira frequentada</label>
+                <input id="assistencia-gira" name="gira" type="text" required>
+            </div>
                         <div class="admin-campo">
                             <label for="assistencia-gira">Gira frequentada</label>
                             <input id="assistencia-gira" name="gira" type="text" required>
