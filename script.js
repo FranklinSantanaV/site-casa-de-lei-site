@@ -648,7 +648,8 @@ if (botaoSairAdministracao) {
     });
 })();
 
-/* SALVAR E CONSULTAR REGISTROS DA ASSISTÊNCIA */
+
+/* SALVAR, CONSULTAR, EDITAR E EXCLUIR REGISTROS DA ASSISTÊNCIA */
 (function () {
     const form = document.getElementById("form-registro-assistencia");
     const mensagem = document.getElementById("mensagem-registro-assistencia");
@@ -660,10 +661,104 @@ if (botaoSairAdministracao) {
         return;
     }
 
+    let registroEmEdicao = null;
+
+    // Cria o botão de cancelar edição sem alterar o HTML existente.
+    const botaoCancelar = document.createElement("button");
+    botaoCancelar.type = "button";
+    botaoCancelar.className = "admin-botao admin-botao-secundario";
+    botaoCancelar.textContent = "Cancelar edição";
+    botaoCancelar.hidden = true;
+    form.appendChild(botaoCancelar);
+
     function valoresMarcados(nome) {
         return Array.from(
             form.querySelectorAll(`input[name="${nome}"]:checked`)
         ).map(campo => campo.value);
+    }
+
+    function marcarOpcoes(nome, valores) {
+        const selecionados = valores || [];
+
+        form.querySelectorAll(`input[name="${nome}"]`).forEach(campo => {
+            campo.checked = selecionados.includes(campo.value);
+        });
+    }
+
+    async function obterUsuarioEAcesso() {
+        const { data: { user }, error: erroUsuario } =
+            await supabaseClient.auth.getUser();
+
+        if (erroUsuario || !user) {
+            return { user: null, administrador: false };
+        }
+
+        const { data: perfil, error } = await supabaseClient
+            .from("perfis_casa")
+            .select("aprovado, administrador")
+            .eq("id", user.id)
+            .maybeSingle();
+
+        if (error || !perfil || !perfil.aprovado) {
+            return { user, administrador: false };
+        }
+
+        return {
+            user,
+            administrador: perfil.administrador === true
+        };
+    }
+
+    function limparEdicao() {
+        registroEmEdicao = null;
+        form.reset();
+        botaoCancelar.hidden = true;
+
+        const botaoSalvar = form.querySelector('button[type="submit"]');
+        if (botaoSalvar) {
+            botaoSalvar.textContent = "Salvar registro";
+        }
+    }
+
+    botaoCancelar.addEventListener("click", function () {
+        limparEdicao();
+        mensagem.textContent = "Edição cancelada.";
+    });
+
+    function iniciarEdicao(pessoa) {
+        registroEmEdicao = pessoa.id;
+
+        document.getElementById("assistencia-data").value =
+            pessoa.data_assistencia || "";
+
+        form.elements["gira"].value = pessoa.gira || "";
+        form.elements["responsavel"].value = pessoa.responsavel_recepcao || "";
+        form.elements["nome"].value = pessoa.nome_completo || "";
+        form.elements["email"].value = pessoa.email || "";
+        form.elements["telefone"].value = pessoa.telefone || "";
+        form.elements["endereco"].value = pessoa.endereco || "";
+        form.elements["detalhe-origem"].value = pessoa.detalhe_origem || "";
+        form.elements["frequenta-terreiro"].value =
+            pessoa.frequenta_outro_terreiro || "";
+
+        form.elements["deseja-grupo"].value =
+            pessoa.deseja_grupo_assistencia ? "Sim" : "Não";
+
+        form.elements["observacoes"].value = pessoa.observacoes || "";
+
+        marcarOpcoes("assistencia-origem", pessoa.como_conheceu);
+        marcarOpcoes("assistencia-motivo", pessoa.motivos_visita);
+
+        const botaoSalvar = form.querySelector('button[type="submit"]');
+        if (botaoSalvar) {
+            botaoSalvar.textContent = "Salvar alterações";
+        }
+
+        botaoCancelar.hidden = false;
+        mensagem.textContent =
+            "Editando cadastro de " + (pessoa.nome_completo || "assistido") + ".";
+
+        form.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
     async function carregarRegistros() {
@@ -677,10 +772,12 @@ if (botaoSairAdministracao) {
 
         if (error) {
             console.error("Erro ao carregar assistências:", error);
-            lista.textContent = "Não foi possível carregar os registros. Verifique sua autorização.";
+            lista.textContent =
+                "Não foi possível carregar os registros. Verifique sua autorização.";
             return;
         }
 
+        const acesso = await obterUsuarioEAcesso();
         lista.replaceChildren();
 
         if (!registros || registros.length === 0) {
@@ -690,10 +787,10 @@ if (botaoSairAdministracao) {
 
         const grupos = {};
 
-        registros.forEach(registro => {
-            const data = registro.data_assistencia;
+        registros.forEach(pessoa => {
+            const data = pessoa.data_assistencia;
             if (!grupos[data]) grupos[data] = [];
-            grupos[data].push(registro);
+            grupos[data].push(pessoa);
         });
 
         Object.entries(grupos).forEach(([data, pessoas]) => {
@@ -701,7 +798,9 @@ if (botaoSairAdministracao) {
             const titulo = document.createElement("summary");
             const dataFormatada = data.split("-").reverse().join("/");
 
-            titulo.textContent = `📁 Assistência de ${dataFormatada} (${pessoas.length})`;
+            titulo.textContent =
+                `📁 Assistência de ${dataFormatada} (${pessoas.length})`;
+
             pasta.appendChild(titulo);
 
             pessoas.forEach(pessoa => {
@@ -709,7 +808,7 @@ if (botaoSairAdministracao) {
                 const nome = document.createElement("summary");
                 const conteudo = document.createElement("div");
 
-                nome.textContent = pessoa.nome_completo;
+                nome.textContent = pessoa.nome_completo || "Sem nome";
                 conteudo.style.whiteSpace = "pre-wrap";
 
                 const linhas = [
@@ -729,6 +828,63 @@ if (botaoSairAdministracao) {
                 conteudo.textContent = linhas.join("\n");
                 item.appendChild(nome);
                 item.appendChild(conteudo);
+
+                if (acesso.administrador) {
+                    const botoes = document.createElement("div");
+                    botoes.style.display = "flex";
+                    botoes.style.gap = "8px";
+                    botoes.style.flexWrap = "wrap";
+                    botoes.style.marginTop = "12px";
+
+                    const editar = document.createElement("button");
+                    editar.type = "button";
+                    editar.className = "admin-botao admin-botao-secundario";
+                    editar.textContent = "✏️ Editar";
+                    editar.addEventListener("click", function () {
+                        iniciarEdicao(pessoa);
+                    });
+
+                    const excluir = document.createElement("button");
+                    excluir.type = "button";
+                    excluir.className = "admin-botao admin-botao-secundario";
+                    excluir.textContent = "🗑️ Excluir";
+
+                    excluir.addEventListener("click", async function () {
+                        const confirmar = window.confirm(
+                            `Deseja realmente excluir o cadastro de "${pessoa.nome_completo}" da assistência de ${dataFormatada}? Esta ação não pode ser desfeita.`
+                        );
+
+                        if (!confirmar) return;
+
+                        excluir.disabled = true;
+                        mensagem.textContent = "Excluindo registro...";
+
+                        const { error } = await supabaseClient
+                            .from("registros_assistencia")
+                            .delete()
+                            .eq("id", pessoa.id);
+
+                        if (error) {
+                            console.error("Erro ao excluir assistência:", error);
+                            mensagem.textContent =
+                                "Não foi possível excluir. Verifique as permissões.";
+                            excluir.disabled = false;
+                            return;
+                        }
+
+                        if (registroEmEdicao === pessoa.id) {
+                            limparEdicao();
+                        }
+
+                        mensagem.textContent = "Registro excluído com sucesso!";
+                        await carregarRegistros();
+                    });
+
+                    botoes.appendChild(editar);
+                    botoes.appendChild(excluir);
+                    conteudo.appendChild(botoes);
+                }
+
                 pasta.appendChild(item);
             });
 
@@ -739,25 +895,37 @@ if (botaoSairAdministracao) {
     form.addEventListener("submit", async function (evento) {
         evento.preventDefault();
 
-        mensagem.textContent = "Salvando registro...";
+        mensagem.textContent = registroEmEdicao
+            ? "Salvando alterações..."
+            : "Salvando registro...";
 
-        const { data: { user }, error: erroUsuario } =
-            await supabaseClient.auth.getUser();
+        const acesso = await obterUsuarioEAcesso();
+        const user = acesso.user;
 
-        if (erroUsuario || !user) {
-            mensagem.textContent = "Entre na Área de Membros antes de salvar.";
+        if (!user) {
+            mensagem.textContent =
+                "Entre na Área de Membros antes de salvar.";
             return;
         }
 
-        const { data: perfil, error: erroPerfil } = await supabaseClient
-            .from("perfis_casa")
-            .select("aprovado")
-            .eq("id", user.id)
-            .maybeSingle();
-
-        if (erroPerfil || !perfil || !perfil.aprovado) {
-            mensagem.textContent = "Sua conta não tem autorização para salvar registros.";
+        if (registroEmEdicao && !acesso.administrador) {
+            mensagem.textContent =
+                "Somente administradores aprovados podem editar cadastros.";
             return;
+        }
+
+        if (!registroEmEdicao) {
+            const { data: perfil, error: erroPerfil } = await supabaseClient
+                .from("perfis_casa")
+                .select("aprovado")
+                .eq("id", user.id)
+                .maybeSingle();
+
+            if (erroPerfil || !perfil || !perfil.aprovado) {
+                mensagem.textContent =
+                    "Sua conta não tem autorização para salvar registros.";
+                return;
+            }
         }
 
         const dataAssistencia =
@@ -767,9 +935,6 @@ if (botaoSairAdministracao) {
             mensagem.textContent = "Selecione a data da assistência.";
             return;
         }
-
-        const desejaGrupo =
-            form.elements["deseja-grupo"].value === "Sim";
 
         const registro = {
             data_assistencia: dataAssistencia,
@@ -782,24 +947,45 @@ if (botaoSairAdministracao) {
             como_conheceu: valoresMarcados("assistencia-origem"),
             detalhe_origem: form.elements["detalhe-origem"].value.trim(),
             frequenta_outro_terreiro: form.elements["frequenta-terreiro"].value,
-            deseja_grupo_assistencia: desejaGrupo,
+            deseja_grupo_assistencia:
+                form.elements["deseja-grupo"].value === "Sim",
             motivos_visita: valoresMarcados("assistencia-motivo"),
-            observacoes: form.elements["observacoes"].value.trim(),
-            criado_por: user.id
+            observacoes: form.elements["observacoes"].value.trim()
         };
 
-        const { error } = await supabaseClient
-            .from("registros_assistencia")
-            .insert(registro);
+        let error;
+
+        if (registroEmEdicao) {
+            const resultado = await supabaseClient
+                .from("registros_assistencia")
+                .update(registro)
+                .eq("id", registroEmEdicao);
+
+            error = resultado.error;
+        } else {
+            registro.criado_por = user.id;
+
+            const resultado = await supabaseClient
+                .from("registros_assistencia")
+                .insert(registro);
+
+            error = resultado.error;
+        }
 
         if (error) {
             console.error("Erro ao salvar assistência:", error);
-            mensagem.textContent = "Não foi possível salvar. Verifique as permissões do Supabase.";
+            mensagem.textContent =
+                "Não foi possível salvar. Verifique as permissões do Supabase.";
             return;
         }
 
-        mensagem.textContent = "Registro salvo com sucesso!";
-        form.reset();
+        const estavaEditando = registroEmEdicao !== null;
+        limparEdicao();
+
+        mensagem.textContent = estavaEditando
+            ? "Alterações salvas com sucesso!"
+            : "Registro salvo com sucesso!";
+
         await carregarRegistros();
     });
 
