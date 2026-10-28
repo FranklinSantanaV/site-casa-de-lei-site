@@ -1,140 +1,118 @@
-/* ============================================================
-   1. REGISTRO E CONSULTA DA ASSISTÊNCIA (SUPABASE)
-   ============================================================ */
 
-const btnCadastrarAssistencia = document.querySelector("#cadastrar-assistencia");
-const msgAssistencia = document.querySelector("#mensagem-assistencia");
+/* AGENDAMENTO DE JOGO DE BÚZIOS E PIX */
 
-if (btnCadastrarAssistencia) {
-    btnCadastrarAssistencia.addEventListener("click", async () => {
-        const gira = document.querySelector("#assistencia-gira").value;
-        const responsavel = document.querySelector("#assistencia-responsavel").value.trim();
-        const nome = document.querySelector("#assistencia-nome").value.trim();
-        const email = document.querySelector("#assistencia-email").value.trim();
-        const telefone = document.querySelector("#assistencia-telefone").value.trim();
-        const endereco = document.querySelector("#assistencia-endereco").value.trim();
-        const frequentou = document.querySelector("#assistencia-frequentou").value;
-        const grupo = document.querySelector("#assistencia-grupo").value;
-        const observacao = document.querySelector("#assistencia-observacao").value.trim();
-        const soubeOutroTexto = document.querySelector("#assistencia-soube-outro").value.trim();
+const formularioJogo = document.querySelector(".agenda-formulario");
 
-        const checkboxesSoube = document.querySelectorAll('input[name="como_soube"]:checked');
-        let comoSoubeArr = Array.from(checkboxesSoube).map(cb => cb.value);
-        if (soubeOutroTexto) {
-            comoSoubeArr.push("Detalhe: " + soubeOutroTexto);
+if (formularioJogo) {
+    const botaoPix = document.querySelector("#copiar-pix");
+    const botaoComprovante = document.querySelector("#enviar-comprovante");
+    const campoMensagem = document.querySelector("#mensagem-agenda");
+
+    const chavePix = "11958483252";
+    const numeroCasa = "5511986005002";
+
+    
+
+botaoPix.addEventListener("click", async function () {
+    let copiou = false;
+
+    try {
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(chavePix);
+            copiou = true;
         }
-        const comoSoubeStr = comoSoubeArr.join(", ");
+    } catch (erro) {
+        copiou = false;
+    }
 
-        const checkboxesMotivos = document.querySelectorAll('input[name="motivo"]:checked');
-        let motivosArr = Array.from(checkboxesMotivos).map(cb => cb.value);
-        const motivosStr = motivosArr.join(", ");
+    if (!copiou) {
+        const campoTemporario = document.createElement("textarea");
+        campoTemporario.value = chavePix;
+        campoTemporario.style.position = "fixed";
+        campoTemporario.style.left = "-9999px";
 
-        if (!nome) {
-            msgAssistencia.textContent = "Por favor, preencha ao menos o nome completo.";
-            msgAssistencia.style.color = "red";
+        document.body.appendChild(campoTemporario);
+        campoTemporario.select();
+
+        try {
+            copiou = document.execCommand("copy");
+        } catch (erro) {
+            copiou = false;
+        }
+
+        campoTemporario.remove();
+    }
+
+    if (copiou) {
+        campoMensagem.textContent =
+            "Chave Pix copiada! Abra o aplicativo do seu banco para pagar R$ 100,00.";
+    } else {
+        campoMensagem.textContent =
+            "Não foi possível copiar automaticamente. Selecione e copie a chave Pix: " + chavePix;
+    }
+});
+
+
+
+    botaoComprovante.addEventListener("click", function () {
+        const data = document.querySelector("#data-jogo").value;
+        const horario = document.querySelector("#horario-jogo").value;
+        const nome = document.querySelector("#nome-jogo").value.trim();
+        const whatsapp = document.querySelector("#whatsapp-jogo").value.trim();
+
+        if (!data || !horario || !nome || !whatsapp) {
+            alert("Preencha todos os campos antes de continuar.");
             return;
         }
 
-        msgAssistencia.textContent = "Salvando registro...";
-        msgAssistencia.style.color = "#174c70";
+        const dataEscolhida = new Date(data + "T12:00:00");
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
 
-        const { data, error } = await supabaseClient
-            .from("registro_assistencia")
-            .insert([
-                {
-                    gira: gira,
-                    responsavel: responsavel,
-                    nome: nome,
-                    email: email,
-                    telefone: telefone,
-                    endereco: endereco,
-                    como_soube: comoSoubeStr,
-                    frequentou_terreiro: frequentou,
-                    participar_grupo: grupo,
-                    motivos: motivosStr,
-                    observacao: observacao
-                }
-            ]);
+        if (dataEscolhida < hoje) {
+            alert("Escolha uma data de hoje em diante.");
+            return;
+        }
 
-        if (error) {
-            msgAssistencia.textContent = "Erro ao salvar: " + error.message;
-            msgAssistencia.style.color = "red";
-        } else {
-            msgAssistencia.textContent = "Ficha cadastrada com sucesso!";
-            msgAssistencia.style.color = "green";
+        const dataFormatada = data.split("-").reverse().join("/");
 
-            document.querySelector("#assistencia-gira").value = "";
-            document.querySelector("#assistencia-responsavel").value = "";
-            document.querySelector("#assistencia-nome").value = "";
-            document.querySelector("#assistencia-email").value = "";
-            document.querySelector("#assistencia-telefone").value = "";
-            document.querySelector("#assistencia-endereco").value = "";
-            document.querySelector("#assistencia-soube-outro").value = "";
-            document.querySelector("#assistencia-frequentou").value = "";
-            document.querySelector("#assistencia-grupo").value = "";
-            document.querySelector("#assistencia-observacao").value = "";
+        const mensagem =
+            "Olá! Quero solicitar um agendamento para Jogo de Búzios.\n\n" +
+            "Nome: " + nome + "\n" +
+            "Meu WhatsApp: " + whatsapp + "\n" +
+            "Data desejada: " + dataFormatada + "\n" +
+            "Horário desejado: " + horario + "\n" +
+            "Atendimento presencial\n" +
+            "Valor: R$ 100,00\n" +
+            "Pix utilizado: " + chavePix + "\n\n" +
+            "Realizei o pagamento e vou enviar o comprovante nesta conversa. Por favor, confirmem o recebimento e a disponibilidade do horário.";
 
-            document.querySelectorAll('input[name="como_soube"]').forEach(cb => cb.checked = false);
-            document.querySelectorAll('input[name="motivo"]').forEach(cb => cb.checked = false);
+        const link = "https://wa.me/" + numeroCasa +
+            "?text=" + encodeURIComponent(mensagem);
 
-            carregarAssistencia();
+        window.open(link, "_blank");
+    });
+}
+
+
+/* ABRIR E FECHAR OS ÁLBUNS DA GALERIA */
+
+document.querySelectorAll(".titulo-album").forEach(function (botao) {
+    botao.addEventListener("click", function () {
+        const album = botao.nextElementSibling;
+        const estaAberto = botao.getAttribute("aria-expanded") === "true";
+
+        botao.setAttribute("aria-expanded", String(!estaAberto));
+        album.hidden = estaAberto;
+
+        const seta = botao.querySelector(".seta-album");
+        if (seta) {
+            seta.textContent = estaAberto ? "＋" : "－";
         }
     });
-}
+});
 
-async function carregarAssistencia() {
-    const containerLista = document.querySelector("#lista-assistencia");
-    if (!containerLista) return;
-
-    containerLista.innerHTML = "<p>Carregando registros...</p>";
-
-    const { data, error } = await supabaseClient
-        .from("registro_assistencia")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-    if (error) {
-        containerLista.innerHTML = "<p>Erro ao carregar lista.</p>";
-        return;
-    }
-
-    if (!data || data.length === 0) {
-        containerLista.innerHTML = "<p>Nenhum registro encontrado.</p>";
-        return;
-    }
-
-    let html = '<div style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">';
-
-    data.forEach(item => {
-        const dataCadastro = new Date(item.created_at).toLocaleDateString("pt-BR");
-        html += `
-            <div style="padding: 16px; border: 1px solid #e2d5b5; border-radius: 8px; background: #f8f6f0;">
-                <h4 style="color: #174c70; margin-bottom: 6px;">${item.nome}</h4>
-                <p style="margin: 2px 0; font-size: 0.9rem;"><strong>Gira:</strong> ${item.gira || 'Não informada'}</p>
-                <p style="margin: 2px 0; font-size: 0.9rem;"><strong>Recepção por:</strong> ${item.responsavel || 'Não informado'}</p>
-                <p style="margin: 2px 0; font-size: 0.9rem;"><strong>Contato:</strong> ${item.telefone || '-'} | ${item.email || '-'}</p>
-                <p style="margin: 2px 0; font-size: 0.9rem;"><strong>Endereço:</strong> ${item.endereco || 'Não informado'}</p>
-                <p style="margin: 2px 0; font-size: 0.9rem;"><strong>Como soube:</strong> ${item.como_soube || '-'}</p>
-                <p style="margin: 2px 0; font-size: 0.9rem;"><strong>Frequenta terreiro?</strong> ${item.frequentou_terreiro || '-'} | <strong>Quer grupo?</strong> ${item.participar_grupo || '-'}</p>
-                <p style="margin: 2px 0; font-size: 0.9rem;"><strong>Motivos:</strong> ${item.motivos || '-'}</p>
-                ${item.observacao ? `<p style="margin: 2px 0; font-size: 0.9rem;"><strong>Obs:</strong> ${item.observacao}</p>` : ''}
-                <small style="color: #888; display: block; margin-top: 6px;">Data do cadastro: ${dataCadastro}</small>
-            </div>
-        `;
-    });
-
-    html += '</div>';
-    containerLista.innerHTML = html;
-}
-
-const btnAtualizarAssistencia = document.querySelector("#atualizar-assistencia");
-if (btnAtualizarAssistencia) {
-    btnAtualizarAssistencia.addEventListener("click", carregarAssistencia);
-}
-
-/* ============================================================
-   2. ABRIR E FECHAR O MENU PRINCIPAL
-   ============================================================ */
+/* ABRIR E FECHAR O MENU PRINCIPAL */
 
 const botaoMenu = document.querySelector("#botao-menu");
 const menuPrincipal = document.querySelector("#menu-principal");
@@ -143,142 +121,512 @@ const iconeMenuPrincipal = document.querySelector("#icone-menu-principal");
 if (botaoMenu && menuPrincipal) {
     botaoMenu.addEventListener("click", function () {
         const estaFechado = menuPrincipal.classList.contains("menu-fechado");
+
         menuPrincipal.classList.toggle("menu-fechado");
 
         botaoMenu.setAttribute("aria-expanded", String(estaFechado));
-        botaoMenu.setAttribute("aria-label", estaFechado ? "Fechar menu" : "Abrir menu");
+        botaoMenu.setAttribute(
+            "aria-label",
+            estaFechado ? "Fechar menu" : "Abrir menu"
+        );
 
         if (iconeMenuPrincipal) {
             iconeMenuPrincipal.textContent = estaFechado ? "✕" : "☰";
         }
     });
 
-    menuPrincipal.querySelectorAll("a").forEach(function (link) {
-        link.addEventListener("click", function () {
-            menuPrincipal.classList.add("menu-fechado");
-            botaoMenu.setAttribute("aria-expanded", "false");
-            if (iconeMenuPrincipal) iconeMenuPrincipal.textContent = "☰";
+  
+menuPrincipal.querySelectorAll("a").forEach(function (link) {
+    link.addEventListener("click", function () {
+        menuPrincipal.classList.add("menu-fechado");
+        botaoMenu.setAttribute("aria-expanded", "false");
+        botaoMenu.setAttribute("aria-label", "Abrir menu");
 
-            const destino = link.getAttribute("href");
-            if (destino && destino.startsWith("#")) {
-                const secao = document.querySelector(destino);
-                if (secao) {
-                    const botaoRecolhivel = secao.querySelector(".titulo-recolhivel");
-                    if (botaoRecolhivel) {
-                        const idConteudo = botaoRecolhivel.getAttribute("aria-controls");
-                        const conteudo = document.getElementById(idConteudo);
-                        if (conteudo) {
-                            botaoRecolhivel.setAttribute("aria-expanded", "true");
-                            conteudo.hidden = false;
-                            const sinal = botaoRecolhivel.querySelector(".sinal-recolher");
-                            if (sinal) sinal.textContent = "−";
+        if (iconeMenuPrincipal) {
+            iconeMenuPrincipal.textContent = "☰";
+        }
+
+        const destino = link.getAttribute("href");
+
+        if (destino && destino.startsWith("#")) {
+            const secao = document.querySelector(destino);
+
+            if (secao) {
+                const botaoRecolhivel =
+                    secao.querySelector(".titulo-recolhivel");
+
+                if (botaoRecolhivel) {
+                    const idConteudo =
+                        botaoRecolhivel.getAttribute("aria-controls");
+
+                    const conteudo =
+                        document.getElementById(idConteudo);
+
+                    if (conteudo) {
+                        botaoRecolhivel.setAttribute(
+                            "aria-expanded",
+                            "true"
+                        );
+
+                        conteudo.hidden = false;
+
+                        const sinal =
+                            botaoRecolhivel.querySelector(
+                                ".sinal-recolher"
+                            );
+
+                        if (sinal) {
+                            sinal.textContent = "−";
                         }
                     }
                 }
             }
-        });
+        }
     });
+});
+
 }
 
-/* ============================================================
-   3. ABRIR E FECHAR SEÇÕES RECOLHÍVEIS
-   ============================================================ */
+/* ABRIR E FECHAR A HISTÓRIA */
 
 document.querySelectorAll(".titulo-recolhivel").forEach(function (botao) {
     botao.addEventListener("click", function () {
         const idConteudo = botao.getAttribute("aria-controls");
         const conteudo = document.getElementById(idConteudo);
-        if (!conteudo) return;
-
         const aberto = botao.getAttribute("aria-expanded") === "true";
+
         botao.setAttribute("aria-expanded", String(!aberto));
         conteudo.hidden = aberto;
 
         const sinal = botao.querySelector(".sinal-recolher");
-        if (sinal) sinal.textContent = aberto ? "＋" : "−";
+        sinal.textContent = aberto ? "＋" : "−";
     });
 });
 
-/* ============================================================
-   4. CONTROLE DE MATERIAIS E LOGIN
-   ============================================================ */
+/* ===== CONTROLE DE MATERIAIS E LOGIN ===== */
 
 async function verificarAcessoMateriais() {
-    if (typeof supabaseClient === "undefined") return null;
+    const { data: { user }, error } =
+        await supabaseClient.auth.getUser();
 
-    const { data: { user }, error } = await supabaseClient.auth.getUser();
-    if (error || !user) return null;
+    if (error || !user) {
+        return null;
+    }
 
-    const { data: perfil, error: erroPerfil } = await supabaseClient
-        .from("perfis_casa")
-        .select("nome_usuario, aprovado, administrador")
-        .eq("id", user.id)
-        .maybeSingle();
+    const { data: perfil, error: erroPerfil } =
+        await supabaseClient
+            .from("perfis_casa")
+            .select("nome_usuario, aprovado, administrador")
+            .eq("id", user.id)
+            .maybeSingle();
 
-    if (erroPerfil || !perfil || !perfil.aprovado) return null;
+    if (erroPerfil || !perfil || !perfil.aprovado) {
+        return null;
+    }
 
     return { user, perfil };
 }
 
-async function listarMateriaisCasa() {
-    if (typeof supabaseClient === "undefined") return null;
+/* LISTAR MATERIAIS */
 
+async function listarMateriaisCasa() {
     const { data, error } = await supabaseClient
         .from("materiais_casa")
         .select("id, item, quantidade, observacao, categoria, status")
         .order("id", { ascending: true });
 
-    if (error) return null;
+    if (error) {
+        console.error("Erro ao listar materiais:", error.message);
+        return null;
+    }
+
     return data;
 }
 
-const formularioLoginMembros = document.getElementById("form-login-membros");
-const painelAdministrativo = document.getElementById("painel-administrativo");
-const mensagemLogin = document.getElementById("mensagem-login");
-const mensagemMateriais = document.getElementById("mensagem-materiais");
-const listaMateriais = document.getElementById("lista-materiais");
+/* ELEMENTOS DO PAINEL */
+
+const formularioLoginMembros =
+    document.getElementById("form-login-membros");
+
+const painelAdministrativo =
+    document.getElementById("painel-administrativo");
+
+const mensagemLogin =
+    document.getElementById("mensagem-login");
+
+const mensagemMateriais =
+    document.getElementById("mensagem-materiais");
+
+const listaMateriais =
+    document.getElementById("lista-materiais");
+
+/* MOSTRAR OU OCULTAR O PAINEL */
 
 function mostrarPainelAdministrativo(mostrar) {
-    if (painelAdministrativo) painelAdministrativo.hidden = !mostrar;
+    if (painelAdministrativo) {
+        painelAdministrativo.hidden = !mostrar;
+    }
 }
 
-if (formularioLoginMembros) {
-    formularioLoginMembros.addEventListener("submit", async function (event) {
-        event.preventDefault();
-        const campoEmail = document.getElementById("email-membro");
-        const campoSenha = document.getElementById("senha-membro");
+/* EXIBIR A LISTA DE MATERIAIS */
 
-        if (!campoEmail || !campoSenha || !mensagemLogin) return;
 
-        mensagemLogin.textContent = "Verificando acesso...";
+async function atualizarListaMateriais() {
+    if (!listaMateriais || !mensagemMateriais) return;
+
+    listaMateriais.replaceChildren();
+    mensagemMateriais.textContent = "Carregando materiais...";
+
+    const acesso = await verificarAcessoMateriais();
+
+    if (!acesso) {
+        mensagemMateriais.textContent =
+            "Você precisa entrar com uma conta de membro aprovada.";
         mostrarPainelAdministrativo(false);
+        return;
+    }
 
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
-            email: campoEmail.value.trim(),
-            password: campoSenha.value
+    const materiais = await listarMateriaisCasa();
+
+    if (materiais === null) {
+        mensagemMateriais.textContent =
+            "Não foi possível carregar os materiais.";
+        return;
+    }
+
+    if (materiais.length === 0) {
+        mensagemMateriais.textContent =
+            "Nenhum material cadastrado ainda.";
+        return;
+    }
+
+    mensagemMateriais.textContent =
+        "Materiais encontrados: " + materiais.length;
+
+    materiais.forEach(function (material) {
+        const itemLista = document.createElement("article");
+
+        const titulo = document.createElement("h4");
+        titulo.textContent = material.item || "Material sem nome";
+
+        const quantidade = document.createElement("p");
+        quantidade.textContent =
+            "Quantidade: " + (material.quantidade || "Não informada");
+
+        const categoria = document.createElement("p");
+        categoria.textContent =
+            "Categoria: " + (material.categoria || "Não informada");
+
+        const status = document.createElement("p");
+        status.textContent =
+            "Situação: " + (material.status || "Não informada");
+
+        const observacao = document.createElement("p");
+        observacao.textContent =
+            "Observações: " + (material.observacao || "Nenhuma");
+
+        itemLista.append(
+            titulo,
+            quantidade,
+            categoria,
+            status,
+            observacao
+        );
+
+        const botaoEditar = document.createElement("button");
+        botaoEditar.type = "button";
+        botaoEditar.textContent = "Editar";
+
+        botaoEditar.addEventListener("click", function () {
+            materialEmEdicao = material.id;
+
+            document.getElementById("material-item").value =
+                material.item || "";
+            document.getElementById("material-quantidade").value =
+                material.quantidade || "";
+            document.getElementById("material-categoria").value =
+                material.categoria || "";
+            document.getElementById("material-status").value =
+                material.status || "Pendente";
+            document.getElementById("material-observacao").value =
+                material.observacao || "";
+
+            botaoCadastrarMaterial.textContent = "Salvar alterações";
+
+            mensagemMateriais.textContent =
+                "Edite os campos acima e clique em Salvar alterações.";
         });
 
-        if (error) {
-            mensagemLogin.textContent = "Não foi possível entrar. Confira o e-mail e a senha.";
-            return;
+        itemLista.appendChild(botaoEditar);
+
+        if (acesso.perfil.administrador) {
+            const botaoExcluir = document.createElement("button");
+            botaoExcluir.type = "button";
+            botaoExcluir.textContent = "Excluir";
+
+            botaoExcluir.addEventListener("click", async function () {
+                const confirmar = window.confirm(
+                    "Tem certeza de que deseja excluir este material?"
+                );
+
+                if (!confirmar) return;
+
+                const acessoAtual = await verificarAcessoMateriais();
+
+                if (!acessoAtual || !acessoAtual.perfil.administrador) {
+                    mensagemMateriais.textContent =
+                        "Você não tem autorização para excluir materiais.";
+                    return;
+                }
+
+                const resultado = await supabaseClient
+                    .from("materiais_casa")
+                    .delete()
+                    .eq("id", material.id)
+                    .select("id");
+
+                if (resultado.error || !resultado.data?.length) {
+                    mensagemMateriais.textContent =
+                        "Não foi possível excluir o material. Verifique as permissões.";
+                    return;
+                }
+
+                mensagemMateriais.textContent =
+                    "Material excluído com sucesso!";
+                await atualizarListaMateriais();
+            });
+
+            itemLista.appendChild(botaoExcluir);
         }
 
-        const { data: perfil, error: erroPerfil } = await supabaseClient
-            .from("perfis_casa")
-            .select("nome_usuario, aprovado, administrador")
-            .eq("id", data.user.id)
-            .maybeSingle();
+        itemLista.style.borderBottom = "1px solid #ccc";
+        itemLista.style.padding = "12px 0";
 
-        if (erroPerfil || !perfil || !perfil.aprovado) {
-            await supabaseClient.auth.signOut();
-            mensagemLogin.textContent = "Acesso pendente de aprovação pela administração.";
-            return;
-        }
-
-        mensagemLogin.textContent = "Login realizado!";
-        mostrarPainelAdministrativo(true);
-        carregarAssistencia();
+        listaMateriais.appendChild(itemLista);
     });
 }
+/* LOGIN DA ÁREA DE MEMBROS */
+
+if (formularioLoginMembros) {
+    formularioLoginMembros.addEventListener(
+        "submit",
+        async function (event) {
+            event.preventDefault();
+
+            const campoEmail =
+                document.getElementById("email-membro");
+
+            const campoSenha =
+                document.getElementById("senha-membro");
+
+            if (!campoEmail || !campoSenha || !mensagemLogin) {
+                return;
+            }
+
+            mensagemLogin.textContent = "Verificando acesso...";
+            mostrarPainelAdministrativo(false);
+
+            const { data, error } =
+                await supabaseClient.auth.signInWithPassword({
+                    email: campoEmail.value.trim(),
+                    password: campoSenha.value
+                });
+
+            if (error) {
+                mensagemLogin.textContent =
+                    "Não foi possível entrar. Confira o e-mail e a senha.";
+                return;
+            }
+
+            const { data: perfil, error: erroPerfil } =
+                await supabaseClient
+                    .from("perfis_casa")
+                    .select("nome_usuario, aprovado, administrador")
+                    .eq("id", data.user.id)
+                    .maybeSingle();
+
+            if (erroPerfil || !perfil || !perfil.aprovado) {
+                await supabaseClient.auth.signOut();
+
+                mensagemLogin.textContent =
+                    "Acesso pendente de aprovação pela administração.";
+                return;
+            }
+
+          mensagemLogin.textContent =
+    "Login realizado! Bem-vindo à Área de Membros da Casa de Lei.";
+
+mostrarPainelAdministrativo(true);
+await atualizarListaMateriais();
+        }
+    );
+}
+
+/* CADASTRAR MATERIAL */
+
+let materialEmEdicao = null;
+
+const botaoCadastrarMaterial =
+    document.getElementById("cadastrar-material");
+
+if (botaoCadastrarMaterial) {
+    botaoCadastrarMaterial.addEventListener("click", async function () {
+        const campoItem = document.getElementById("material-item");
+        const campoQuantidade =
+            document.getElementById("material-quantidade");
+        const campoCategoria =
+            document.getElementById("material-categoria");
+        const campoStatus =
+            document.getElementById("material-status");
+        const campoObservacao =
+            document.getElementById("material-observacao");
+
+        if (
+            !campoItem ||
+            !campoQuantidade ||
+            !campoCategoria ||
+            !campoStatus ||
+            !campoObservacao ||
+            !mensagemMateriais
+        ) {
+            return;
+        }
+
+        const item = campoItem.value.trim();
+
+        if (!item) {
+            mensagemMateriais.textContent =
+                "Informe o nome do material.";
+            campoItem.focus();
+            return;
+        }
+
+        mensagemMateriais.textContent = "Salvando material...";
+
+        const resultadoAcesso = await verificarAcessoMateriais();
+
+       if (!resultadoAcesso) {
+    mensagemMateriais.textContent =
+        "Você precisa entrar com uma conta de membro aprovada.";
+    mostrarPainelAdministrativo(false);
+    return;
+}
+
+       
+        let resultadoGravacao;
+
+        try {
+            if (materialEmEdicao !== null) {
+                resultadoGravacao = await supabaseClient
+                    .from("materiais_casa")
+                    .update({
+                        item: item,
+                        quantidade: campoQuantidade.value.trim(),
+                        categoria: campoCategoria.value.trim(),
+                        status: campoStatus.value.trim(),
+                        observacao: campoObservacao.value.trim()
+                    })
+                    .eq("id", materialEmEdicao);
+            } else {
+                resultadoGravacao = await supabaseClient
+                    .from("materiais_casa")
+                    .insert({
+                        item: item,
+                        quantidade: campoQuantidade.value.trim(),
+                        categoria: campoCategoria.value.trim(),
+                        status: campoStatus.value.trim(),
+                        observacao: campoObservacao.value.trim(),
+                        autor_id: resultadoAcesso.user.id
+                    });
+            }
+        } catch (erro) {
+            console.error("Erro ao salvar material:", erro);
+            mensagemMateriais.textContent =
+                "Ocorreu um erro ao salvar. Tente novamente.";
+            return;
+        }
+
+        if (resultadoGravacao.error) {
+            console.error(
+                "Erro ao salvar material:",
+                resultadoGravacao.error.message
+            );
+            mensagemMateriais.textContent =
+                "Não foi possível salvar: " +
+                resultadoGravacao.error.message;
+            return;
+        }
+
+        materialEmEdicao = null;
+
+        campoItem.value = "";
+        campoQuantidade.value = "";
+        campoCategoria.value = "";
+        campoStatus.value = "Pendente";
+        campoObservacao.value = "";
+
+        botaoCadastrarMaterial.textContent = "Cadastrar material";
+
+        mensagemMateriais.textContent =
+            "Material salvo com sucesso!";
+
+        await atualizarListaMateriais();
+
+    });
+}
+
+/* ATUALIZAR A LISTA */
+
+const botaoAtualizarMateriais =
+    document.getElementById("atualizar-materiais");
+
+if (botaoAtualizarMateriais) {
+    botaoAtualizarMateriais.addEventListener("click", async function () {
+        await atualizarListaMateriais();
+    });
+}
+
+/* SAIR DA CONTA */
+
+const botaoSairAdministracao =
+    document.getElementById("sair-administracao");
+
+if (botaoSairAdministracao) {
+    botaoSairAdministracao.addEventListener("click", async function () {
+        if (mensagemLogin) {
+            mensagemLogin.textContent = "Saindo da conta...";
+        }
+
+        const { error } = await supabaseClient.auth.signOut();
+
+        if (error) {
+            if (mensagemLogin) {
+                mensagemLogin.textContent =
+                    "Não foi possível sair. Tente novamente.";
+            }
+            return;
+        }
+
+        mostrarPainelAdministrativo(false);
+
+        if (mensagemLogin) {
+            mensagemLogin.textContent = "Você saiu da sua conta.";
+        }
+
+        if (formularioLoginMembros) {
+            formularioLoginMembros.reset();
+        }
+
+        if (listaMateriais) {
+            listaMateriais.replaceChildren();
+        }
+
+        if (mensagemMateriais) {
+            mensagemMateriais.textContent = "";
+        }
+    });
+}
+
+/* MANTER O PAINEL OCULTO AO ABRIR A PÁGINA */
 
 mostrarPainelAdministrativo(false);
