@@ -18,7 +18,7 @@ if (btnCadastrarAssistencia) {
         const observacao = document.querySelector("#assistencia-observacao").value.trim();
         const soubeOutroTexto = document.querySelector("#assistencia-soube-outro").value.trim();
 
-        // Capturar checkboxes de "Como soube" (Múltipla escolha)
+        // Capturar checkboxes de "Como soube"
         const checkboxesSoube = document.querySelectorAll('input[name="como_soube"]:checked');
         let comoSoubeArr = Array.from(checkboxesSoube).map(cb => cb.value);
         if (soubeOutroTexto) {
@@ -26,7 +26,7 @@ if (btnCadastrarAssistencia) {
         }
         const comoSoubeStr = comoSoubeArr.join(", ");
 
-        // Capturar checkboxes de "Motivos" (Múltipla escolha)
+        // Capturar checkboxes de "Motivos"
         const checkboxesMotivos = document.querySelectorAll('input[name="motivo"]:checked');
         let motivosArr = Array.from(checkboxesMotivos).map(cb => cb.value);
         const motivosStr = motivosArr.join(", ");
@@ -40,7 +40,6 @@ if (btnCadastrarAssistencia) {
         msgAssistencia.textContent = "Salvando registro...";
         msgAssistencia.style.color = "#174c70";
 
-        // Enviar para a tabela 'registro_assistencia' no Supabase
         const { data, error } = await supabaseClient
             .from("registro_assistencia")
             .insert([
@@ -66,7 +65,6 @@ if (btnCadastrarAssistencia) {
             msgAssistencia.textContent = "Ficha cadastrada com sucesso!";
             msgAssistencia.style.color = "green";
 
-            // Limpar formulário
             document.querySelector("#assistencia-gira").value = "";
             document.querySelector("#assistencia-responsavel").value = "";
             document.querySelector("#assistencia-nome").value = "";
@@ -81,13 +79,11 @@ if (btnCadastrarAssistencia) {
             document.querySelectorAll('input[name="como_soube"]').forEach(cb => cb.checked = false);
             document.querySelectorAll('input[name="motivo"]').forEach(cb => cb.checked = false);
 
-            // Atualizar lista de cadastrados
             carregarAssistencia();
         }
     });
 }
 
-// Função para buscar e exibir a lista de assistidos
 async function carregarAssistencia() {
     const containerLista = document.querySelector("#lista-assistencia");
     if (!containerLista) return;
@@ -247,11 +243,11 @@ document.querySelectorAll(".titulo-album").forEach(function (botao) {
         const estaAberto = botao.getAttribute("aria-expanded") === "true";
 
         botao.setAttribute("aria-expanded", String(!estaAberto));
-        album.hidden = estaAberto;
+        if (album) album.hidden = estaAberto;
 
         const seta = botao.querySelector(".seta-album");
         if (seta) {
-            seta.textContent = estaAberto ? "＋" : "－";
+            seta.textContent = estaAberto ? "＋" : "−";
         }
     });
 });
@@ -361,6 +357,8 @@ document.querySelectorAll(".titulo-recolhivel").forEach(function (botao) {
    ============================================================ */
 
 async function verificarAcessoMateriais() {
+    if (typeof supabaseClient === "undefined") return null;
+
     const { data: { user }, error } =
         await supabaseClient.auth.getUser();
 
@@ -383,6 +381,8 @@ async function verificarAcessoMateriais() {
 }
 
 async function listarMateriaisCasa() {
+    if (typeof supabaseClient === "undefined") return null;
+
     const { data, error } = await supabaseClient
         .from("materiais_casa")
         .select("id, item, quantidade, observacao, categoria, status")
@@ -416,6 +416,9 @@ function mostrarPainelAdministrativo(mostrar) {
         painelAdministrativo.hidden = !mostrar;
     }
 }
+
+let materialEmEdicao = null;
+const botaoCadastrarMaterial = document.getElementById("cadastrar-material");
 
 async function atualizarListaMateriais() {
     if (!listaMateriais || !mensagemMateriais) return;
@@ -497,7 +500,9 @@ async function atualizarListaMateriais() {
             document.getElementById("material-observacao").value =
                 material.observacao || "";
 
-            botaoCadastrarMaterial.textContent = "Salvar alterações";
+            if (botaoCadastrarMaterial) {
+                botaoCadastrarMaterial.textContent = "Salvar alterações";
+            }
 
             mensagemMateriais.textContent =
                 "Edite os campos acima e clique em Salvar alterações.";
@@ -603,15 +608,10 @@ if (formularioLoginMembros) {
 
             mostrarPainelAdministrativo(true);
             await atualizarListaMateriais();
-            carregarAssistencia(); // Carrega também a lista da assistência ao logar
+            carregarAssistencia();
         }
     );
 }
-
-let materialEmEdicao = null;
-
-const botaoCadastrarMaterial =
-    document.getElementById("cadastrar-material");
 
 if (botaoCadastrarMaterial) {
     botaoCadastrarMaterial.addEventListener("click", async function () {
