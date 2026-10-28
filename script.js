@@ -648,6 +648,168 @@ if (botaoSairAdministracao) {
     });
 })();
 
+/* SALVAR E CONSULTAR REGISTROS DA ASSISTÊNCIA */
+(function () {
+    const form = document.getElementById("form-registro-assistencia");
+    const mensagem = document.getElementById("mensagem-registro-assistencia");
+    const lista = document.getElementById("lista-registros-assistencia");
+    const botaoAtualizar = document.getElementById("atualizar-registros-assistencia");
+
+    if (!form || !mensagem || !lista) {
+        console.error("Formulário ou lista da assistência não encontrados.");
+        return;
+    }
+
+    function valoresMarcados(nome) {
+        return Array.from(
+            form.querySelectorAll(`input[name="${nome}"]:checked`)
+        ).map(campo => campo.value);
+    }
+
+    async function carregarRegistros() {
+        lista.textContent = "Carregando registros...";
+
+        const { data: registros, error } = await supabaseClient
+            .from("registros_assistencia")
+            .select("*")
+            .order("data_assistencia", { ascending: false })
+            .order("criado_em", { ascending: false });
+
+        if (error) {
+            console.error("Erro ao carregar assistências:", error);
+            lista.textContent = "Não foi possível carregar os registros. Verifique sua autorização.";
+            return;
+        }
+
+        lista.replaceChildren();
+
+        if (!registros || registros.length === 0) {
+            lista.textContent = "Ainda não há registros cadastrados.";
+            return;
+        }
+
+        const grupos = {};
+
+        registros.forEach(registro => {
+            const data = registro.data_assistencia;
+            if (!grupos[data]) grupos[data] = [];
+            grupos[data].push(registro);
+        });
+
+        Object.entries(grupos).forEach(([data, pessoas]) => {
+            const pasta = document.createElement("details");
+            const titulo = document.createElement("summary");
+            const dataFormatada = data.split("-").reverse().join("/");
+
+            titulo.textContent = `📁 Assistência de ${dataFormatada} (${pessoas.length})`;
+            pasta.appendChild(titulo);
+
+            pessoas.forEach(pessoa => {
+                const item = document.createElement("details");
+                const nome = document.createElement("summary");
+                const conteudo = document.createElement("div");
+
+                nome.textContent = pessoa.nome_completo;
+                conteudo.style.whiteSpace = "pre-wrap";
+
+                const linhas = [
+                    `Gira: ${pessoa.gira || "Não informado"}`,
+                    `Responsável pela recepção: ${pessoa.responsavel_recepcao || "Não informado"}`,
+                    `Telefone: ${pessoa.telefone || "Não informado"}`,
+                    `E-mail: ${pessoa.email || "Não informado"}`,
+                    `Endereço: ${pessoa.endereco || "Não informado"}`,
+                    `Origem: ${(pessoa.como_conheceu || []).join(", ") || "Não informado"}`,
+                    `Detalhe da origem: ${pessoa.detalhe_origem || "Não informado"}`,
+                    `Frequenta outro terreiro: ${pessoa.frequenta_outro_terreiro || "Não informado"}`,
+                    `Deseja participar do grupo: ${pessoa.deseja_grupo_assistencia ? "Sim" : "Não"}`,
+                    `Motivos: ${(pessoa.motivos_visita || []).join(", ") || "Não informado"}`,
+                    `Observações: ${pessoa.observacoes || "Nenhuma"}`
+                ];
+
+                conteudo.textContent = linhas.join("\n");
+                item.appendChild(nome);
+                item.appendChild(conteudo);
+                pasta.appendChild(item);
+            });
+
+            lista.appendChild(pasta);
+        });
+    }
+
+    form.addEventListener("submit", async function (evento) {
+        evento.preventDefault();
+
+        mensagem.textContent = "Salvando registro...";
+
+        const { data: { user }, error: erroUsuario } =
+            await supabaseClient.auth.getUser();
+
+        if (erroUsuario || !user) {
+            mensagem.textContent = "Entre na Área de Membros antes de salvar.";
+            return;
+        }
+
+        const { data: perfil, error: erroPerfil } = await supabaseClient
+            .from("perfis_casa")
+            .select("aprovado")
+            .eq("id", user.id)
+            .maybeSingle();
+
+        if (erroPerfil || !perfil || !perfil.aprovado) {
+            mensagem.textContent = "Sua conta não tem autorização para salvar registros.";
+            return;
+        }
+
+        const dataAssistencia =
+            document.getElementById("assistencia-data").value;
+
+        if (!dataAssistencia) {
+            mensagem.textContent = "Selecione a data da assistência.";
+            return;
+        }
+
+        const desejaGrupo =
+            form.elements["deseja-grupo"].value === "Sim";
+
+        const registro = {
+            data_assistencia: dataAssistencia,
+            nome_completo: form.elements["nome"].value.trim(),
+            telefone: form.elements["telefone"].value.trim(),
+            email: form.elements["email"].value.trim(),
+            endereco: form.elements["endereco"].value.trim(),
+            responsavel_recepcao: form.elements["responsavel"].value.trim(),
+            gira: form.elements["gira"].value.trim(),
+            como_conheceu: valoresMarcados("assistencia-origem"),
+            detalhe_origem: form.elements["detalhe-origem"].value.trim(),
+            frequenta_outro_terreiro: form.elements["frequenta-terreiro"].value,
+            deseja_grupo_assistencia: desejaGrupo,
+            motivos_visita: valoresMarcados("assistencia-motivo"),
+            observacoes: form.elements["observacoes"].value.trim(),
+            criado_por: user.id
+        };
+
+        const { error } = await supabaseClient
+            .from("registros_assistencia")
+            .insert(registro);
+
+        if (error) {
+            console.error("Erro ao salvar assistência:", error);
+            mensagem.textContent = "Não foi possível salvar. Verifique as permissões do Supabase.";
+            return;
+        }
+
+        mensagem.textContent = "Registro salvo com sucesso!";
+        form.reset();
+        await carregarRegistros();
+    });
+
+    if (botaoAtualizar) {
+        botaoAtualizar.addEventListener("click", carregarRegistros);
+    }
+
+    window.carregarRegistrosAssistencia = carregarRegistros;
+})();
+
 
 /* RESTAURAR A SESSÃO AO ATUALIZAR A PÁGINA */
 
