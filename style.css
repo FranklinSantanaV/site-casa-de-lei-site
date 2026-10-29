@@ -1537,3 +1537,226 @@ footer p + p {
     }
 }
 
+
+/* ========================================
+   REFINAMENTO DOS PAINÉIS — CASA DE LEI
+======================================== */
+
+:root {
+    --casa-verde: #173f32;
+    --casa-verde-escuro: #102d24;
+    --casa-dourado: #c6a45b;
+    --casa-creme: #f8f6f0;
+    --casa-texto: #34443c;
+    --casa-borda: #e1e6de;
+}
+
+/* Painel administrativo de materiais */
+
+#painel-administrativo {
+    background: linear-gradient(180deg, #fbfcf9 0%, #f3f6f1 100%);
+    border: 1px solid var(--casa-borda);
+    border-top: 5px solid var(--casa-dourado);
+    border-radius: 18px;
+    box-shadow: 0 12px 32px rgba(23, 63, 50, 0.09);
+}
+
+#painel-administrativo .admin-cartao {
+    border-radius: 16px;
+    border-color: #e5e8e0;
+    box-shadow: 0 5px 18px rgba(23, 63, 50, 0.045);
+    transition: box-shadow 0.2s ease;
+}
+
+#painel-administrativo .admin-cartao:hover {
+    box-shadow: 0 8px 24px rgba(23, 63, 50, 0.08);
+}
+
+/* Campos de formulário */
+
+#painel-administrativo .admin-campo input,
+#painel-administrativo .admin-campo select,
+#painel-administrativo .admin-campo textarea,
+#form-registro-assistencia input:not([type="checkbox"]),
+#form-registro-assistencia select,
+#form-registro-assistencia textarea {
+    border: 1px solid #d7ded5;
+    border-radius: 9px;
+    background-color: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#form-registro-assistencia input:not([type="checkbox"]),
+#form-registro-assistencia select,
+#form-registro-assistencia textarea {
+    width: 100%;
+    max-width: 100%;
+    padding: 12px 14px;
+    color: var(--casa-texto);
+    font: inherit;
+}
+
+#form-registro-assistencia input:focus,
+#form-registro-assistencia select:focus,
+#form-registro-assistencia textarea:focus {
+    outline: none;
+    border-color: var(--casa-verde);
+    box-shadow: 0 0 0 3px rgba(23, 63, 50, 0.12);
+}
+
+#form-registro-assistencia label {
+    color: var(--casa-verde);
+    font-weight: 600;
+}
+
+#form-registro-assistencia .admin-campo {
+    margin-bottom: 16px;
+}
+
+/* Botões do registro da assistência */
+
+#form-registro-assistencia button,
+#lista-registros-assistencia button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 42px;
+    padding: 10px 16px;
+    border: 1px solid var(--casa-dourado);
+    border-radius: 9px;
+    background: var(--casa-verde);
+    color: #fff;
+    font: inherit;
+    font-size: 0.93rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+#form-registro-assistencia button:hover,
+#lista-registros-assistencia button:hover {
+    background: var(--casa-verde-escuro);
+    transform: translateY(-1px);
+}
+
+#form-registro-assistencia button:focus-visible,
+#lista-registros-assistencia button:focus-visible {
+    outline: 3px solid var(--casa-dourado);
+    outline-offset: 3px;
+}
+
+#form-registro-assistencia button:disabled,
+#lista-registros-assistencia button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Lista e histórico das assistências */
+
+#lista-registros-assistencia {
+    margin-top: 20px;
+    color: var(--casa-texto);
+    overflow-wrap: anywhere;
+}
+
+#lista-registros-assistencia > details {
+    margin: 14px 0;
+    overflow: hidden;
+    border: 1px solid #dfd5bd;
+    border-radius: 13px;
+    background: #fffdf8;
+    box-shadow: 0 4px 14px rgba(23, 63, 50, 0.045);
+}
+
+#lista-registros-assistencia > details > summary {
+    padding: 17px 20px;
+    background: #f3eee1;
+    color: var(--casa-verde);
+    font-weight: 700;
+    cursor: pointer;
+    list-style-position: inside;
+}
+
+#lista-registros-assistencia > details[open] > summary {
+    border-bottom: 1px solid #e5dcc9;
+}
+
+#lista-registros-assistencia details details {
+    margin: 12px;
+    border: 1px solid #e5e8e0;
+    border-radius: 11px;
+    background: #fff;
+    overflow: hidden;
+}
+
+#lista-registros-assistencia details details > summary {
+    padding: 14px 16px;
+    color: var(--casa-verde);
+    font-weight: 700;
+    cursor: pointer;
+    background: #fff;
+}
+
+#lista-registros-assistencia details details[open] > summary {
+    background: #f6f8f4;
+    border-bottom: 1px solid #e5e8e0;
+}
+
+#lista-registros-assistencia details details > div {
+    padding: 16px;
+    line-height: 1.85;
+}
+
+/* Botão de exclusão */
+
+#lista-registros-assistencia button:last-child {
+    background: #fff;
+    color: #8c4038;
+    border-color: #dfc2bd;
+}
+
+#lista-registros-assistencia button:last-child:hover {
+    background: #fbefed;
+}
+
+/* Mensagens de retorno */
+
+#mensagem-registro-assistencia,
+#mensagem-materiais {
+    padding: 10px 0;
+    color: var(--casa-verde);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+/* Ajustes para celular */
+
+@media (max-width: 600px) {
+    #form-registro-assistencia button,
+    #lista-registros-assistencia button {
+        min-height: 44px;
+        padding: 10px 12px;
+    }
+
+    #lista-registros-assistencia > details > summary {
+        padding: 15px 12px;
+    }
+
+    #lista-registros-assistencia details details {
+        margin: 8px;
+    }
+
+    #lista-registros-assistencia details details > div {
+        padding: 12px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #painel-administrativo .admin-cartao,
+    #form-registro-assistencia button,
+    #lista-registros-assistencia button {
+        transition: none;
+    }
+}
